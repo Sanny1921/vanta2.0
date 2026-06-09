@@ -7,7 +7,7 @@ import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/vanta">
       <RoomProvider>
         <Routes>
           <Route path="/" element={<Home />} />
