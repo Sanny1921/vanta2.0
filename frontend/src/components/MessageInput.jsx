@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useUI } from '../context/UIContext';
 import '../css/MessageInput.css';
 
 export default function MessageInput({
@@ -9,6 +10,7 @@ export default function MessageInput({
   disabled
 }) {
   const [message, setMessage] = useState('');
+  const { showToast } = useUI();
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
 
@@ -52,8 +54,21 @@ export default function MessageInput({
     onTypingStop();
   };
 
+  const handleAttachment = () => {
+    showToast('Attachments are disabled in this room.', 'info');
+  };
+
   return (
     <form className="message-input-form" onSubmit={handleSubmit}>
+      <button
+        type="button"
+        className="btn-attachment"
+        onClick={handleAttachment}
+        disabled={disabled}
+        title="Attach file"
+      >
+        📎
+      </button>
       <input
         type="text"
         className="message-input"

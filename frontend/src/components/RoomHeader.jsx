@@ -1,72 +1,155 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useUI } from '../context/UIContext';
 import '../css/RoomHeader.css';
 
 export default function RoomHeader({
   roomId,
   totalUsers,
   maxUsers,
-  onParticipantsClick,
   isHost,
-  onTerminate
+  onShowParticipants,
+  onShowDetails,
+  onShowManageUsers,
+  onTerminate,
+  onLeaveRoom
 }) {
-  const [showMenu, setShowMenu] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const { showToast } = useUI();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
-    alert(`${label} copied to clipboard!`);
+    showToast(`${label} copied to clipboard!`, 'success');
+  };
+
+  const getInviteLink = () => {
+    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const cleanAppUrl = appUrl.replace(/\/$/, '');
+    return cleanAppUrl.includes('/vanta')
+      ? `${cleanAppUrl}/join/${roomId}`
+      : `${cleanAppUrl}/vanta/join/${roomId}`;
   };
 
   return (
     <header className="room-header">
       <div className="room-header-left">
-        <h1 className="room-title">Vanta</h1>
+        <h1 className="room-title">VANTA</h1>
       </div>
 
-      <div className="room-header-center">
-        <div className="room-info">
-          <span className="room-id-display">Room: {roomId}</span>
-        </div>
-      </div>
-
-      <div className="room-header-right">
+      <div className="room-header-right" ref={dropdownRef}>
         <button
-          className="btn-participants"
-          onClick={onParticipantsClick}
-          title="View participants"
+          className="btn-menu-trigger"
+          onClick={() => setShowDropdown(!showDropdown)}
+          aria-label="Room options"
         >
-          <span className="user-icon">👥</span>
-          <span className="user-count">Users: {totalUsers}/{maxUsers || 5}</span>
+          ⋮
         </button>
 
-        {isHost && (
-          <div className="host-menu">
-            <button
-              className="btn-menu"
-              onClick={() => setShowMenu(!showMenu)}
-              title="Host menu"
-            >
-              ⋮
-            </button>
-            {showMenu && (
-              <div className="menu-dropdown">
-                <button
-                  className="menu-item"
-                  onClick={() => copyToClipboard(roomId, 'Room ID')}
-                >
-                  Copy Room ID
-                </button>
-                <button
-                  className="menu-item danger"
+        {showDropdown && (
+          <div className="vanta-dropdown">
+            <div className="dropdown-section">
+              <span className="dropdown-section-title">ROOM</span>
+              
+              <button 
+                className="dropdown-item" 
+                onClick={() => {
+                  copyToClipboard(roomId, 'Room ID');
+                  setShowDropdown(false);
+                }}
+              >
+                <span className="item-icon">#</span>
+                <span className="item-text">Room ID</span>
+                <span className="item-value">{roomId}</span>
+              </button>
+
+              <button 
+                className="dropdown-item" 
+                onClick={() => {
+                  copyToClipboard(getInviteLink(), 'Invite Link');
+                  setShowDropdown(false);
+                }}
+              >
+                <span className="item-icon">🔗</span>
+                <span className="item-text">Copy Invite Link</span>
+              </button>
+
+              <button 
+                className="dropdown-item" 
+                onClick={() => {
+                  onShowParticipants();
+                  setShowDropdown(false);
+                }}
+              >
+                <span className="item-icon">👥</span>
+                <span className="item-text">Participants ({totalUsers}/{maxUsers || 5})</span>
+              </button>
+
+              <button 
+                className="dropdown-item" 
+                onClick={() => {
+                  onShowDetails();
+                  setShowDropdown(false);
+                }}
+              >
+                <span className="item-icon">ℹ️</span>
+                <span className="item-text">Room Details</span>
+              </button>
+            </div>
+
+            {isHost && (
+              <div className="dropdown-section border-top">
+                <span className="dropdown-section-title">HOST OPTIONS</span>
+
+                <button 
+                  className="dropdown-item" 
                   onClick={() => {
-                    setShowMenu(false);
-                    onTerminate();
+                    onShowManageUsers();
+                    setShowDropdown(false);
                   }}
                 >
-                  Terminate Room
+                  <span className="item-icon">👤</span>
+                  <span className="item-text">Manage Users</span>
+                </button>
+
+                <button 
+                  className="dropdown-item danger" 
+                  onClick={() => {
+                    onTerminate();
+                    setShowDropdown(false);
+                  }}
+                >
+                  <span className="item-icon">🗑️</span>
+                  <span className="item-text">Terminate Room</span>
                 </button>
               </div>
             )}
+
+            <div className="dropdown-section border-top">
+              <button 
+                className="dropdown-item leave-btn" 
+                onClick={() => {
+                  onLeaveRoom();
+                  setShowDropdown(false);
+                }}
+              >
+                <span className="item-icon">↪️</span>
+                <span className="item-text">Leave Room</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -78,7 +161,10 @@ RoomHeader.propTypes = {
   roomId: PropTypes.string.isRequired,
   totalUsers: PropTypes.number.isRequired,
   maxUsers: PropTypes.number,
-  onParticipantsClick: PropTypes.func.isRequired,
   isHost: PropTypes.bool.isRequired,
-  onTerminate: PropTypes.func.isRequired
+  onShowParticipants: PropTypes.func.isRequired,
+  onShowDetails: PropTypes.func.isRequired,
+  onShowManageUsers: PropTypes.func.isRequired,
+  onTerminate: PropTypes.func.isRequired,
+  onLeaveRoom: PropTypes.func.isRequired
 };

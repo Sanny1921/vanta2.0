@@ -1,51 +1,109 @@
 import PropTypes from 'prop-types';
+import { useUI } from '../context/UIContext';
 import '../css/ChatArea.css';
 
 export default function ChatArea({
   messages,
   currentUserId,
   isRoomDeleted,
-  messagesEndRef
+  messagesEndRef,
+  roomId
 }) {
+  const { showToast } = useUI();
+  const hasUserMessages = messages.some(msg => msg.type === 'user');
+
+  const handleCopyLink = () => {
+    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const cleanAppUrl = appUrl.replace(/\/$/, '');
+    const inviteLink = cleanAppUrl.includes('/vanta')
+      ? `${cleanAppUrl}/join/${roomId}`
+      : `${cleanAppUrl}/vanta/join/${roomId}`;
+    navigator.clipboard.writeText(inviteLink);
+    showToast('Invite link copied to clipboard!', 'success');
+  };
+
+  const getInitials = (name) => {
+    return name ? name.trim().charAt(0).toUpperCase() : '?';
+  };
+
+  // Helper to format system messages cleanly
+  const getSystemIcon = (content) => {
+    if (content.toLowerCase().includes('created')) return '✨';
+    if (content.toLowerCase().includes('joined')) return '👤';
+    if (content.toLowerCase().includes('left')) return '🚪';
+    if (content.toLowerCase().includes('removed') || content.toLowerCase().includes('kick')) return '🚫';
+    return '🔔';
+  };
+
   return (
     <div className={`chat-area ${isRoomDeleted ? 'room-deleted' : ''}`}>
       <div className="messages-container">
-        {messages.length === 0 ? (
-          <div className="empty-chat">
-            <p>No messages yet. Start the conversation!</p>
+        
+        {/* Empty state card */}
+        {!hasUserMessages && (
+          <div className="vanta-empty-state">
+            <div className="empty-state-card">
+              <div className="empty-card-icon">✨</div>
+              <h3>Room Created</h3>
+              <p>Share the invite link to start the conversation.</p>
+              <button onClick={handleCopyLink} className="btn-copy-invite">
+                Copy Invite Link
+              </button>
+            </div>
           </div>
-        ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.messageId}
-              className={`message ${msg.type} ${
-                msg.senderId === currentUserId ? 'own' : ''
-              }`}
-            >
-              {msg.type === 'system' ? (
-                <div className="system-message">
-                  <span>{msg.content}</span>
-                </div>
-              ) : (
-                <>
-                  <div className="message-sender">
-                    <strong>{msg.senderDisplayName}</strong>
-                    {msg.isHost && <span className="host-badge">👑</span>}
-                  </div>
-                  <div className="message-content">
-                    {msg.content}
-                  </div>
-                  <div className="message-time">
+        )}
+
+        {/* Message feed */}
+        {messages.map((msg) => {
+          if (msg.type === 'system') {
+            return (
+              <div key={msg.messageId} className="system-message-row">
+                <div className="system-message-content">
+                  <span className="system-icon">{getSystemIcon(msg.content)}</span>
+                  <span className="system-text">{msg.content}</span>
+                  <span className="system-time">
                     {new Date(msg.createdAt).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
-                  </div>
-                </>
-              )}
+                  </span>
+                </div>
+              </div>
+            );
+          }
+
+          const isOwn = msg.senderId === currentUserId;
+          const avatarLetter = getInitials(msg.senderDisplayName);
+
+          return (
+            <div
+              key={msg.messageId}
+              className={`message-row ${isOwn ? 'own' : ''}`}
+            >
+              <div className="message-avatar">
+                {avatarLetter}
+              </div>
+              <div className="message-body">
+                <div className="message-header-info">
+                  <span className="message-sender-name">
+                    {msg.senderDisplayName}
+                    {msg.isHost && <span className="host-indicator-star">★</span>}
+                  </span>
+                  <span className="message-timestamp">
+                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+                <div className="message-text-content">
+                  {msg.content}
+                </div>
+              </div>
             </div>
-          ))
-        )}
+          );
+        })}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -62,7 +120,8 @@ export default function ChatArea({
 
 ChatArea.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.object).isRequired,
-  currentUserId: PropTypes.string.isRequired,
+  currentUserId: PropTypes.string,
   isRoomDeleted: PropTypes.bool.isRequired,
-  messagesEndRef: PropTypes.object
+  messagesEndRef: PropTypes.object,
+  roomId: PropTypes.string.isRequired
 };

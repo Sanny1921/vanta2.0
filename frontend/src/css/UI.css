@@ -1,0 +1,221 @@
+/* Toast Container */
+.vanta-toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.vanta-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px solid var(--vanta-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--vanta-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 380px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.vanta-toast.success {
+  border-left: 4px solid #10b981;
+}
+
+.vanta-toast.success .toast-icon {
+  color: #10b981;
+}
+
+.vanta-toast.error {
+  border-left: 4px solid var(--vanta-danger);
+}
+
+.vanta-toast.error .toast-icon {
+  color: var(--vanta-danger);
+}
+
+.vanta-toast.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.vanta-toast.warning .toast-icon {
+  color: #f59e0b;
+}
+
+.vanta-toast.info {
+  border-left: 4px solid var(--vanta-accent);
+}
+
+.vanta-toast.info .toast-icon {
+  color: var(--vanta-accent);
+}
+
+.toast-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* Modal Backdrops & Cards */
+.vanta-custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.vanta-custom-modal-card {
+  background: var(--vanta-surface);
+  border: 1px solid var(--vanta-border);
+  border-radius: 12px;
+  padding: 28px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: var(--vanta-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.modal-title.error {
+  color: var(--vanta-danger);
+}
+
+.modal-title.warning {
+  color: #f59e0b;
+}
+
+.modal-body {
+  font-size: 15px;
+  color: var(--vanta-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-modal-cancel {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--vanta-text-primary);
+  border: 1px solid var(--vanta-border);
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--vanta-text-muted);
+}
+
+.btn-modal-confirm {
+  background: var(--vanta-danger);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-confirm:hover {
+  background: var(--vanta-danger-hover);
+}
+
+/* Ensure confirm buttons are accent colored if it is not a delete/destructive confirmation */
+.vanta-custom-modal-card:not(:has(.danger-action)) .btn-modal-confirm,
+.btn-modal-confirm:not(.destructive) {
+  background: var(--vanta-accent);
+}
+
+.vanta-custom-modal-card:not(:has(.danger-action)) .btn-modal-confirm:hover,
+.btn-modal-confirm:not(.destructive):hover {
+  background: var(--vanta-accent-hover);
+}
+
+.btn-modal-close-alert {
+  background: var(--vanta-accent);
+  color: white;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-close-alert:hover {
+  background: var(--vanta-accent-hover);
+}

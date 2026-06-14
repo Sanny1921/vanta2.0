@@ -54,6 +54,10 @@ class SocketManager {
         this.handleLeaveRoom(io, socket, data)
       );
 
+      socket.on(SOCKET_EVENTS.KICK_USER, (data, callback) =>
+        this.handleKickUser(io, socket, data, callback)
+      );
+
       socket.on('disconnect', () =>
         this.handleDisconnect(io, socket)
       );
@@ -125,7 +129,10 @@ class SocketManager {
         roomUrl: creationResult.roomUrl,
         roomUserId: joinResult.roomUserId,
         hostAccessToken: creationResult.hostAccessToken,
-        settings: creationResult.settings
+        settings: {
+          ...creationResult.settings,
+          hasPassword: !!password
+        }
       });
 
       // Emit room created event
@@ -201,7 +208,6 @@ class SocketManager {
         `[Socket] ${displayName} joined room ${roomId}. Total users: ${joinResult.totalUsers}`
       );
 
-      // Send confirmation to joiner
       callback({
         roomId,
         roomUserId: joinResult.roomUserId,
@@ -212,7 +218,8 @@ class SocketManager {
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
-          maxUsers: room.settings.maxUsers
+          maxUsers: room.settings.maxUsers,
+          hasPassword: !!room.password
         }
       });
 
@@ -294,7 +301,8 @@ class SocketManager {
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
-          maxUsers: room.settings.maxUsers
+          maxUsers: room.settings.maxUsers,
+          hasPassword: !!room.password
         }
       });
 
@@ -432,6 +440,76 @@ class SocketManager {
     } catch (error) {
       console.error('[Socket] Error terminating room:', error);
       callback({ error: 'TERMINATION_FAILED' });
+    }
+  }
+
+  /**
+   * Handle kicking a user
+   */
+  handleKickUser(io, socket, data, callback) {
+    try {
+      const { roomId, targetRoomUserId, hostAccessToken } = data;
+
+      if (!roomId || !targetRoomUserId) {
+        if (callback) callback({ error: 'INVALID_DATA' });
+        return;
+      }
+
+      const room = roomManager.getRoom(roomId);
+      if (!room) {
+        if (callback) callback({ error: 'ROOM_NOT_FOUND' });
+        return;
+      }
+
+      // Check if requester is host
+      const isHost = (room.hostId === socket.id) || (hostAccessToken && hostAccessToken === room.hostAccessToken);
+      if (!isHost) {
+        if (callback) callback({ error: 'NOT_HOST' });
+        return;
+      }
+
+      const users = roomManager.getUsersInRoom(roomId);
+      const targetUser = users.find(u => u.roomUserId === targetRoomUserId);
+
+      if (!targetUser) {
+        if (callback) callback({ error: 'USER_NOT_FOUND' });
+        return;
+      }
+
+      const targetSocketId = targetUser.socketId;
+      const removedUser = roomManager.removeUserFromRoom(roomId, targetSocketId);
+
+      if (removedUser) {
+        // Disconnect/leave room for the kicked socket
+        io.to(targetSocketId).emit(SOCKET_EVENTS.KICKED_FROM_ROOM, { roomId });
+        io.in(targetSocketId).socketsLeave(roomId);
+
+        console.log(`[Socket] Host kicked user ${removedUser.displayName} (ID: ${removedUser.roomUserId}) from room ${roomId}`);
+
+        // Notify others
+        io.to(roomId).emit(SOCKET_EVENTS.USER_LEFT, {
+          type: SYSTEM_MESSAGE_TYPES.USER_LEFT,
+          user: {
+            roomUserId: removedUser.roomUserId,
+            displayName: removedUser.displayName
+          },
+          totalUsers: roomManager.getRoomUserCount(roomId),
+          message: `${removedUser.displayName} left the room`
+        });
+
+        // Broadcast room users updated event
+        io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, {
+          participants: roomManager.getRoomUsers(roomId),
+          totalUsers: roomManager.getRoomUserCount(roomId)
+        });
+
+        if (callback) callback({ success: true });
+      } else {
+        if (callback) callback({ error: 'KICK_FAILED' });
+      }
+    } catch (error) {
+      console.error('[Socket] Error kicking user:', error);
+      if (callback) callback({ error: 'SERVER_ERROR' });
     }
   }
 

@@ -4,7 +4,7 @@
 export const DEFAULT_ROOM_SETTINGS = {
   roomLifespanMinutes: 30,
   autoDeleteMinutes: 1,
-  maxUsers: 2
+  maxUsers: 5
 };
 
 /**
@@ -60,7 +60,11 @@ export const SOCKET_EVENTS = {
 
   // Participants
   GET_PARTICIPANTS: 'get-participants',
-  PARTICIPANTS: 'participants'
+  PARTICIPANTS: 'participants',
+
+  // Host Moderation / Kick
+  KICK_USER: 'kick-user',
+  KICKED_FROM_ROOM: 'kicked-from-room'
 };
 
 /**

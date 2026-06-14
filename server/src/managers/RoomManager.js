@@ -36,9 +36,9 @@ class RoomManager {
       settings = { ...DEFAULT_ROOM_SETTINGS };
     }
 
-    // Override maxUsers if memberLimit is provided and is less than settings
-    if (memberLimit && memberLimit < settings.maxUsers) {
-      settings.maxUsers = memberLimit;
+    // Use the memberLimit if provided, capping it at the maximum allowed by settings
+    if (memberLimit) {
+      settings.maxUsers = Math.min(memberLimit, settings.maxUsers);
     }
 
     const hostAccessToken = generateId('HOST');

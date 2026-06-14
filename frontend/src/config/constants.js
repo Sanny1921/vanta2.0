@@ -37,7 +37,11 @@ export const SOCKET_EVENTS = {
 
   // Participants
   GET_PARTICIPANTS: 'get-participants',
-  PARTICIPANTS: 'participants'
+  PARTICIPANTS: 'participants',
+
+  // Host Moderation / Kick
+  KICK_USER: 'kick-user',
+  KICKED_FROM_ROOM: 'kicked-from-room'
 };
 
 /**

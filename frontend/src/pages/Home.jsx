@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRoom } from '../context/RoomContext';
+import { useUI } from '../context/UIContext';
 import socketService from '../services/socketService';
 import '../css/Home.css';
 
@@ -8,6 +9,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { roomId } = useParams();
   const { createRoom, joinRoom, setError, error } = useRoom();
+  const { showToast } = useUI();
   const [loading, setLoading] = useState(false);
   const [createdRoomData, setCreatedRoomData] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -85,8 +87,10 @@ export default function Home() {
         password: createForm.password || null,
         settings: response.settings
       });
+      showToast('Room created successfully!', 'success');
     } catch (err) {
       console.error('Failed to create room:', err);
+      showToast(typeof err === 'string' ? err : 'Failed to create room', 'error');
     } finally {
       setLoading(false);
     }
@@ -117,6 +121,14 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Failed to join room:', err);
+      let errMsg = 'Failed to join room';
+      if (err === 'ROOM_NOT_FOUND') errMsg = 'Invalid room code';
+      else if (err === 'ROOM_EXPIRED') errMsg = 'Room has expired';
+      else if (err === 'ROOM_FULL') errMsg = 'Room is full';
+      else if (err === 'INVALID_DISPLAY_NAME') errMsg = 'Please enter a display name';
+      else if (err === 'INVALID_DATA') errMsg = 'Please fill in all fields';
+      else if (typeof err === 'string') errMsg = err;
+      showToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -136,7 +148,7 @@ export default function Home() {
         }
       } else {
         navigator.clipboard.writeText(createdRoomData.roomUrl);
-        alert('Invite Link copied to clipboard!');
+        showToast('Invite Link copied to clipboard!', 'success');
       }
     }
   };
@@ -194,7 +206,7 @@ export default function Home() {
                 className="btn-copy-small" 
                 onClick={() => {
                   navigator.clipboard.writeText(createdRoomData.roomId);
-                  alert('Room ID copied to clipboard!');
+                  showToast('Room ID copied to clipboard!', 'success');
                 }}
               >
                 Copy
@@ -211,7 +223,7 @@ export default function Home() {
                 className="btn-copy-small" 
                 onClick={() => {
                   navigator.clipboard.writeText(createdRoomData.roomUrl);
-                  alert('Invite Link copied to clipboard!');
+                  showToast('Invite Link copied to clipboard!', 'success');
                 }}
               >
                 Copy
@@ -285,12 +297,12 @@ export default function Home() {
       {/* NAVBAR */}
       <nav className="vanta-navbar">
         <div className="navbar-logo">
-          <span className="logo-icon">▲</span> Vanta
+          <span className="logo-icon">▲</span> VANTA
         </div>
         <div className="navbar-links">
           <a href="#home">Home</a>
           <a href="#how-it-works">How It Works</a>
-          <a href="#tokens">Tokens</a>
+          <a href="#why-vanta">Why Vanta</a>
           <a href="#faq">FAQ</a>
         </div>
         <div className="navbar-actions">
@@ -305,221 +317,281 @@ export default function Home() {
 
       {/* HERO SECTION */}
       <header id="home" className="hero-section">
-        <div className="hero-badge">No accounts. No permanent history. No clutter.</div>
-        <h1 className="hero-title">
-          Create.<br />
-          Share.<br />
-          Talk.<br />
-          <span>Disappear.</span>
-        </h1>
-        <p className="hero-subheading">A temporary meeting point on the internet.</p>
-        <p className="hero-description">
-          Vanta creates temporary communication spaces where rooms and messages automatically expire.
-        </p>
-        <div className="hero-buttons">
-          <button className="btn-hero-primary" onClick={() => setIsCreateModalOpen(true)}>
-            Create Room
-          </button>
-          <button className="btn-hero-secondary" onClick={() => setIsJoinModalOpen(true)}>
-            Join Room
-          </button>
+        <div className="hero-container-inner">
+          <div className="hero-left">
+            <div className="hero-badge">Temporary rooms. Real conversations.</div>
+            <h1 className="hero-title">
+              Create. Share.<br />
+              <span className="accent-text">Talk.</span> Leave.
+            </h1>
+            <p className="hero-description">
+              Vanta is a temporary meeting place on the internet.<br /><br />
+              No accounts. No communities. No permanent history.<br /><br />
+              Just create a room, share a link, and start talking.
+            </p>
+            <div className="hero-buttons">
+              <button className="btn-hero-primary" onClick={() => setIsCreateModalOpen(true)}>
+                <span className="btn-icon">⚡</span> Create Room
+              </button>
+              <button className="btn-hero-secondary" onClick={() => setIsJoinModalOpen(true)}>
+                Join Room <span className="btn-icon-right">➔</span>
+              </button>
+            </div>
+            <div className="hero-features-row">
+              <span className="feature-indicator">
+                <span className="feature-indicator-icon">🛡️</span> No Signup Required
+              </span>
+              <span className="feature-indicator">
+                <span className="feature-indicator-icon">🔒</span> End-to-End Encrypted
+              </span>
+              <span className="feature-indicator">
+                <span className="feature-indicator-icon">⏱️</span> Auto-Delete
+              </span>
+            </div>
+          </div>
+
+          <div className="hero-right">
+            {/* Realistic Chat Room Preview */}
+            <div className="chat-preview-card">
+              <div className="preview-header">
+                <span className="preview-title">VANTA</span>
+                <span className="preview-options">⋮</span>
+              </div>
+              <div className="preview-messages">
+                <div className="preview-system-msg">
+                  <span className="sys-icon">✨</span> Room created - Today, 10:24 AM
+                </div>
+                <div className="preview-system-msg">
+                  <span className="sys-icon">👤</span> Alex joined the room
+                </div>
+                <div className="preview-user-msg">
+                  <div className="avatar">A</div>
+                  <div className="msg-content">
+                    <div className="msg-header">Alex <span className="msg-time">10:24 AM</span></div>
+                    <div className="msg-body">Hey everyone!</div>
+                  </div>
+                </div>
+                <div className="preview-system-msg">
+                  <span className="sys-icon">👤</span> Sam joined the room
+                </div>
+                <div className="preview-user-msg">
+                  <div className="avatar blue">S</div>
+                  <div className="msg-content">
+                    <div className="msg-header">Sam <span className="msg-time">10:25 AM</span></div>
+                    <div className="msg-body">Hello!</div>
+                  </div>
+                </div>
+                <div className="preview-system-msg">
+                  <span className="sys-icon">🚪</span> Rahul left the room
+                </div>
+                <div className="preview-user-msg">
+                  <div className="avatar">A</div>
+                  <div className="msg-content">
+                    <div className="msg-header">Alex <span className="msg-time">10:27 AM</span></div>
+                    <div className="msg-body">Let's start.</div>
+                  </div>
+                </div>
+              </div>
+              <div className="preview-composer">
+                <span className="composer-attach">📎</span>
+                <input type="text" className="composer-input" placeholder="Type a message..." disabled />
+                <span className="composer-emoji">😊</span>
+                <button className="btn-composer-send" disabled>Send</button>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* HOW VANTA WORKS */}
-      <section id="how-it-works" className="section how-it-works">
-        <h2 className="section-title">How Vanta Works</h2>
-        <div className="flow-container">
-          <div className="flow-step">
-            <div className="step-icon">🏗️</div>
-            <h3>Create Room</h3>
-            <p>Set a custom limit, optional password, or use a token.</p>
+      {/* SECTION 2 — HOW VANTA WORKS */}
+      <section id="how-it-works" className="section how-it-works-section">
+        <span className="section-label">SIMPLE & FAST</span>
+        <h2 className="section-title-new">How Vanta Works</h2>
+        <p className="section-subtitle-new">Start a conversation in four simple steps.</p>
+        <div className="flow-grid-new">
+          <div className="flow-card-new">
+            <div className="card-number">1</div>
+            <div className="card-icon-container">
+              <span className="card-icon-new">⚙️</span>
+            </div>
+            <h3>Create a Room</h3>
+            <p>Choose your room settings and create a temporary space in seconds.</p>
           </div>
-          <div className="flow-arrow">➔</div>
-          <div className="flow-step">
-            <div className="step-icon">🔗</div>
-            <h3>Share Link</h3>
-            <p>Copy the secure invite link or unique room ID.</p>
+          <div className="flow-arrow-new">➔</div>
+          <div className="flow-card-new">
+            <div className="card-number">2</div>
+            <div className="card-icon-container">
+              <span className="card-icon-new">🔗</span>
+            </div>
+            <h3>Share the Link</h3>
+            <p>Share the invite link with anyone you want to bring in.</p>
           </div>
-          <div className="flow-arrow">➔</div>
-          <div className="flow-step">
-            <div className="step-icon">👥</div>
-            <h3>People Join</h3>
-            <p>Participants join instantly without any registrations.</p>
+          <div className="flow-arrow-new">➔</div>
+          <div className="flow-card-new">
+            <div className="card-number">3</div>
+            <div className="card-icon-container">
+              <span className="card-icon-new">💬</span>
+            </div>
+            <h3>Start Talking</h3>
+            <p>Chat in real time. No login needed for you or your participants.</p>
           </div>
-          <div className="flow-arrow">➔</div>
-          <div className="flow-step">
-            <div className="step-icon">💬</div>
-            <h3>Talk</h3>
-            <p>Chat in real-time as messages automatically expire.</p>
-          </div>
-          <div className="flow-arrow">➔</div>
-          <div className="flow-step">
-            <div className="step-icon">⏱️</div>
-            <h3>Room Expires</h3>
-            <p>The entire room disappears forever once the timer runs out.</p>
+          <div className="flow-arrow-new">➔</div>
+          <div className="flow-card-new">
+            <div className="card-number">4</div>
+            <div className="card-icon-container">
+              <span className="card-icon-new">🗑️</span>
+            </div>
+            <h3>Leave No Trace</h3>
+            <p>When the room ends, messages disappear automatically.</p>
           </div>
         </div>
       </section>
 
-      {/* WHY VANTA EXISTS */}
-      <section className="section why-exists">
-        <h2 className="section-title">Not Every Conversation Needs To Last Forever</h2>
-        <p className="section-subtitle">
-          Most chat apps store your history indefinitely. Vanta is built for quick, temporary sessions:
-        </p>
-        <div className="exists-grid">
-          <div className="exists-card">
-            <h4>Study Groups</h4>
-            <p>Work on assignments, discuss problems, and clear the room when finished.</p>
+      {/* SECTION 3 — WHY VANTA IS DIFFERENT */}
+      <section id="why-vanta" className="section why-vanta-section">
+        <div className="why-vanta-inner">
+          <div className="why-vanta-left">
+            <span className="section-label left-aligned">BUILT DIFFERENT</span>
+            <h2 className="section-title-new left-aligned">
+              Why Vanta<br />
+              <span className="accent-text">is Different</span>
+            </h2>
+            <p className="why-vanta-description">
+              Vanta is not built to keep you engaged forever.<br /><br />
+              It's built to help people have meaningful conversations without the baggage.
+            </p>
           </div>
-          <div className="exists-card">
-            <h4>Planning Sessions</h4>
-            <p>Brainstorm layouts, outline tasks, and share sensitive ideas temporarily.</p>
-          </div>
-          <div className="exists-card">
-            <h4>Quick Discussions</h4>
-            <p>Ad-hoc check-ins where you don't need a persistent chat history trail.</p>
-          </div>
-          <div className="exists-card">
-            <h4>Temporary Communities</h4>
-            <p>Gather people for an event, webinar, or game lobby that has a clear end time.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* TOKENS SECTION */}
-      <section id="tokens" className="section tokens-section">
-        <h2 className="section-title">Token Enhanced Rooms</h2>
-        <p className="section-subtitle">
-          Tokens unlock enhanced room capabilities for heavier workloads and events.
-        </p>
-        <div className="tokens-layout">
-          <div className="tokens-benefits">
-            <div className="benefit-item">
-              <span className="benefit-check">✓</span>
-              <div>
-                <h5>Longer Lifespan</h5>
-                <p>Extend room longevity up to 2 hours (default limit is 5 minutes).</p>
+          <div className="why-vanta-right">
+            <div className="feature-grid-new">
+              <div className="feature-item-new">
+                <span className="feature-item-icon">👁️‍🗨️</span>
+                <div className="feature-item-text">
+                  <h3>No Permanent History</h3>
+                  <p>Rooms and messages auto-delete. Nothing stays behind.</p>
+                </div>
               </div>
-            </div>
-            <div className="benefit-item">
-              <span className="benefit-check">✓</span>
-              <div>
-                <h5>More Participants</h5>
-                <p>Increase room capacity up to 100+ concurrent members.</p>
+              <div className="feature-item-new">
+                <span className="feature-item-icon">⏱️</span>
+                <div className="feature-item-text">
+                  <h3>Temporary by Design</h3>
+                  <p>Every room has an expiry. Everything disappears.</p>
+                </div>
               </div>
-            </div>
-            <div className="benefit-item">
-              <span className="benefit-check">✓</span>
-              <div>
-                <h5>Longer Message Retention</h5>
-                <p>Keep messages alive up to 15 minutes before they auto-delete.</p>
+              <div className="feature-item-new">
+                <span className="feature-item-icon">👤</span>
+                <div className="feature-item-text">
+                  <h3>No Accounts</h3>
+                  <p>Jump in instantly. No signups, no profiles, no hassle.</p>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="token-card-preview">
-            <div className="token-card-header">
-              <span className="token-badge">PREMIUM TOKEN</span>
-              <span className="token-key-display">PREMIUM-001-XYZ</span>
-            </div>
-            <div className="token-card-body">
-              <div className="token-stat">
-                <span>Max Capacity:</span>
-                <strong>100 users</strong>
+              <div className="feature-item-new">
+                <span className="feature-item-icon">⚡</span>
+                <div className="feature-item-text">
+                  <h3>Light & Fast</h3>
+                  <p>Minimal. Clean. Built for speed and simplicity.</p>
+                </div>
               </div>
-              <div className="token-stat">
-                <span>Lifespan:</span>
-                <strong>120 minutes</strong>
+              <div className="feature-item-new">
+                <span className="feature-item-icon">🔒</span>
+                <div className="feature-item-text">
+                  <h3>Privacy First</h3>
+                  <p>End-to-end encrypted rooms to keep your conversations safe.</p>
+                </div>
               </div>
-              <div className="token-stat">
-                <span>Retention:</span>
-                <strong>15 minutes</strong>
+              <div className="feature-item-new">
+                <span className="feature-item-icon">👥</span>
+                <div className="feature-item-text">
+                  <h3>No Communities</h3>
+                  <p>No servers. No channels. Just people and conversations.</p>
+                </div>
               </div>
-            </div>
-            <div className="token-card-footer">
-              <small>Try using token keys to unlock perks.</small>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURES SECTION */}
-      <section className="section features-section">
-        <h2 className="section-title">Product Features</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">🚪</div>
-            <h3>Temporary Rooms</h3>
-            <p>Rooms automatically self-destruct once empty, inactive, or after lifespan expiration.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🗑️</div>
-            <h3>Message Auto Deletion</h3>
-            <p>Messages exist only in volatile server memory and auto-delete on a strict rolling timer.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">⚡</div>
-            <h3>Real-Time Communication</h3>
-            <p>Instant socket-driven communication, message synchronization, and typing indicators.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🔒</div>
-            <h3>Password Protected Rooms</h3>
-            <p>Optional room lock configuration to keep conversations private and restricted.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🔑</div>
-            <h3>Token Enhanced Rooms</h3>
-            <p>Unlock custom parameters using premium keys without account registrations.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">👤</div>
-            <h3>No Account Required</h3>
-            <p>Zero registration, zero trackable profile data, zero personal identities retained.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW TO USE VANTA */}
-      <section className="section how-to-use">
-        <h2 className="section-title">How To Use Vanta</h2>
-        <div className="timeline-container">
-          <div className="timeline-item">
-            <div className="timeline-number">1</div>
-            <div className="timeline-content">
-              <h3>Create Room</h3>
-              <p>Configure details like member limits and optional passwords.</p>
-            </div>
-          </div>
-          <div className="timeline-item">
-            <div className="timeline-number">2</div>
-            <div className="timeline-content">
-              <h3>Share Link</h3>
-              <p>Send the unique URL or ID to invite your participants.</p>
-            </div>
-          </div>
-          <div className="timeline-item">
-            <div className="timeline-number">3</div>
-            <div className="timeline-content">
-              <h3>Join Conversation</h3>
-              <p>Discuss in real-time with automatic message removal.</p>
-            </div>
-          </div>
-          <div className="timeline-item">
-            <div className="timeline-number">4</div>
-            <div className="timeline-content">
-              <h3>Room Expires</h3>
-              <p>All traces of the chat are immediately deleted once empty or expired.</p>
-            </div>
-          </div>
+      {/* SECTION 4 — WHY CHOOSE VANTA OVER OTHER PLATFORMS */}
+      <section className="section comparison-section">
+        <span className="section-label">THE BETTER CHOICE</span>
+        <h2 className="section-title-new">Why Choose Vanta Over Other Platforms?</h2>
+        <div className="comparison-table-container">
+          <table className="comparison-table">
+            <thead>
+              <tr>
+                <th className="th-feature">Feature</th>
+                <th className="th-vanta highlighted-col">Vanta</th>
+                <th>WhatsApp</th>
+                <th>Discord</th>
+                <th>Telegram</th>
+                <th>Google Meet</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="td-feature">No Account Required</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+              </tr>
+              <tr>
+                <td className="td-feature">Temporary Rooms</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+              </tr>
+              <tr>
+                <td className="td-feature">Auto Delete Messages</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+              </tr>
+              <tr>
+                <td className="td-feature">No Permanent History</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+              </tr>
+              <tr>
+                <td className="td-feature">Easy Shareable Link</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="check-val">✓</td>
+                <td className="check-val">✓</td>
+                <td className="check-val">✓</td>
+                <td className="check-val">✓</td>
+              </tr>
+              <tr>
+                <td className="td-feature">Distraction Free</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+              </tr>
+              <tr>
+                <td className="td-feature">Built For Temporary Use</td>
+                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+                <td className="cross-val">✕</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
       {/* FAQ SECTION */}
       <section id="faq" className="section faq-section">
-        <h2 className="section-title">Frequently Asked Questions</h2>
+        <span className="section-label">QUESTIONS & ANSWERS</span>
+        <h2 className="section-title-new">Frequently Asked Questions</h2>
         <div className="faq-list">
           {faqItems.map((item, index) => (
             <div className={`faq-item ${activeFaqIndex === index ? 'active' : ''}`} key={index}>
@@ -535,42 +607,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA SECTION */}
-      <section className="section cta-section">
-        <div className="cta-content">
-          <h2>Start Your Temporary Conversation</h2>
-          <p>Create a room. Invite people. Talk freely.</p>
-          <div className="cta-buttons">
+      {/* SECTION 5 — FINAL CTA */}
+      <section className="section final-cta-section">
+        <div className="final-cta-card">
+          <div className="final-cta-left">
+            <h2>Ready to start a conversation?</h2>
+            <p>Create a room in seconds. No signup. No delays.</p>
+          </div>
+          <div className="final-cta-right">
             <button className="btn-hero-primary" onClick={() => setIsCreateModalOpen(true)}>
-              Create Room
+              <span className="btn-icon">⚡</span> Create Room
             </button>
             <button className="btn-hero-secondary" onClick={() => setIsJoinModalOpen(true)}>
-              Join Room
+              Join Room <span className="btn-icon-right">➔</span>
             </button>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="landing-footer">
-        <div className="footer-top">
-          <div className="footer-brand">
-            <h4>Vanta</h4>
-            <p>Temporary Communication Platform</p>
+      <footer className="new-vanta-footer">
+        <div className="footer-top-new">
+          <div className="footer-brand-new">
+            <div className="footer-logo">▲ VANTA</div>
+            <p>Temporary communication without permanent history.</p>
           </div>
-          <div className="footer-links">
-            <a href="#home">Home</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#tokens">Tokens</a>
+          <div className="footer-links-new">
             <a href="#faq">FAQ</a>
+            <a href="#privacy">Privacy Policy</a>
+            <a href="#terms">Terms of Service</a>
+            <a href="#contact">Contact</a>
           </div>
-          <div className="footer-actions">
-            <button onClick={() => setIsJoinModalOpen(true)}>Join Room</button>
-            <button onClick={() => setIsCreateModalOpen(true)}>Create Room</button>
+          <div className="footer-socials">
+            <a href="https://github.com" aria-label="GitHub" target="_blank" rel="noreferrer">
+              <svg className="social-icon" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noreferrer">
+              <svg className="social-icon" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+            </a>
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Vanta. All rights reserved.</p>
+        <div className="footer-bottom-new">
+          <p>© 2026 Vanta. All rights reserved.</p>
         </div>
       </footer>
 

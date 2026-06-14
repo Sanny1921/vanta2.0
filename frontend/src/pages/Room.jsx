@@ -1,17 +1,21 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRoom } from '../context/RoomContext';
+import { useUI } from '../context/UIContext';
 import socketService from '../services/socketService';
 import { SOCKET_EVENTS, SYSTEM_MESSAGE_TYPES } from '../config/constants';
 import ParticipantList from '../components/ParticipantList';
 import ChatArea from '../components/ChatArea';
 import MessageInput from '../components/MessageInput';
 import RoomHeader from '../components/RoomHeader';
+import RoomDetailsModal from '../components/RoomDetailsModal';
+import ManageUsersModal from '../components/ManageUsersModal';
 import '../css/Room.css';
 
 export default function Room() {
   const navigate = useNavigate();
   const { roomId } = useParams();
+  const { showConfirm, showToast } = useUI();
   const {
     currentRoom,
     roomUserId,
@@ -34,7 +38,7 @@ export default function Room() {
     joinRoom
   } = useRoom();
 
-  const [showParticipants, setShowParticipants] = useState(false);
+  const [activeModal, setActiveModal] = useState(null); // 'participants' | 'details' | 'manage' | null
   const [roomDeleted, setRoomDeleted] = useState(false);
   const messagesEndRef = useRef(null);
   const [rejoining, setRejoining] = useState(() => {
@@ -54,6 +58,7 @@ export default function Room() {
         content: data.content,
         createdAt: data.createdAt,
         expiresAt: data.expiresAt,
+        isHost: data.isHost,
         type: 'user'
       };
       addMessage(message);
@@ -135,6 +140,20 @@ export default function Room() {
       }, 3000);
     });
 
+    socketService.on(SOCKET_EVENTS.KICKED_FROM_ROOM, () => {
+      setRoomDeleted(true);
+      addMessage({
+        messageId: `sys-${Date.now()}`,
+        type: 'system',
+        content: 'You have been removed from the room by the host.',
+        createdAt: Date.now()
+      });
+      setTimeout(() => {
+        clearRoom();
+        navigate('/');
+      }, 3000);
+    });
+
     return () => {
       socketService.off(SOCKET_EVENTS.MESSAGE_RECEIVED);
       socketService.off(SOCKET_EVENTS.MESSAGE_DELETED);
@@ -146,6 +165,7 @@ export default function Room() {
       socketService.off(SOCKET_EVENTS.ROOM_TERMINATION_WARNING);
       socketService.off(SOCKET_EVENTS.ROOM_TERMINATED);
       socketService.off(SOCKET_EVENTS.ROOM_DELETED);
+      socketService.off(SOCKET_EVENTS.KICKED_FROM_ROOM);
     };
   }, [addMessage, deleteMessage, addUser, removeUser, updateParticipants, addTypingUser, removeTypingUser, clearRoom, navigate]);
 
@@ -195,14 +215,46 @@ export default function Room() {
   }, [currentRoom, roomId, joinRoom, navigate]);
 
   const handleLeaveRoom = () => {
-    leaveRoom();
-    navigate('/');
+    showConfirm({
+      title: 'Leave Room?',
+      message: 'You will disconnect from this conversation.',
+      confirmLabel: 'Leave Room',
+      cancelLabel: 'Cancel'
+    }).then(confirmed => {
+      if (confirmed) {
+        leaveRoom();
+        navigate('/');
+      }
+    });
   };
 
   const handleTerminateRoom = () => {
-    if (window.confirm('Are you sure you want to terminate the room? All participants will be disconnected.')) {
-      terminateRoom();
-    }
+    showConfirm({
+      title: 'Terminate Room?',
+      message: 'Are you sure you want to terminate the room? All participants will be disconnected.',
+      confirmLabel: 'Terminate',
+      cancelLabel: 'Cancel'
+    }).then(confirmed => {
+      if (confirmed) {
+        terminateRoom();
+      }
+    });
+  };
+
+  const handleRemoveUser = (targetRoomUserId, displayName) => {
+    const hostAccessToken = sessionStorage.getItem('vanta_host_access_token');
+    socketService.emit(SOCKET_EVENTS.KICK_USER, {
+      roomId,
+      targetRoomUserId,
+      hostAccessToken
+    }, (response) => {
+      if (response && response.error) {
+        showToast(`Failed to remove user: ${response.error}`, 'error');
+      } else {
+        showToast(`User ${displayName || ''} removed`, 'success');
+        setActiveModal(null);
+      }
+    });
   };
 
   if (rejoining) {
@@ -218,33 +270,27 @@ export default function Room() {
     <div className="room-container">
       <div className="room-content-wrapper">
         <RoomHeader
-          roomId={roomId}
+          roomId={roomId || ''}
           totalUsers={totalUsers}
           maxUsers={roomSettings?.maxUsers}
-          onParticipantsClick={() => setShowParticipants(!showParticipants)}
           isHost={isHost}
+          onShowParticipants={() => setActiveModal('participants')}
+          onShowDetails={() => setActiveModal('details')}
+          onShowManageUsers={() => setActiveModal('manage')}
           onTerminate={handleTerminateRoom}
+          onLeaveRoom={handleLeaveRoom}
         />
-
-        {showParticipants && (
-          <ParticipantList
-            participants={participants}
-            isHost={isHost}
-            onClose={() => setShowParticipants(false)}
-          />
-        )}
 
         <ChatArea
           messages={messages}
-          currentUserId={roomUserId}
-          currentDisplayName={displayName}
+          currentUserId={roomUserId || ''}
           isRoomDeleted={roomDeleted}
           messagesEndRef={messagesEndRef}
+          roomId={roomId || ''}
         />
 
         <MessageInput
           onSendMessage={(content) => {
-            // Send message via socket
             socketService.sendMessage({
               roomId: currentRoom,
               senderDisplayName: displayName,
@@ -256,11 +302,30 @@ export default function Room() {
           disabled={roomDeleted}
         />
 
-        <div className="room-actions">
-          <button className="btn-leave" onClick={handleLeaveRoom}>
-            Leave Room
-          </button>
-        </div>
+        {activeModal === 'participants' && (
+          <ParticipantList
+            participants={participants}
+            maxUsers={roomSettings?.maxUsers}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+
+        {activeModal === 'details' && (
+          <RoomDetailsModal
+            settings={roomSettings}
+            participants={participants}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+
+        {activeModal === 'manage' && (
+          <ManageUsersModal
+            participants={participants}
+            currentUserId={roomUserId || ''}
+            onRemoveUser={handleRemoveUser}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
       </div>
     </div>
   );
