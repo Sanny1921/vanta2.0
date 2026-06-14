@@ -39,9 +39,10 @@ export default function RoomHeader({
   const getInviteLink = () => {
     const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const cleanAppUrl = appUrl.replace(/\/$/, '');
-    return cleanAppUrl.includes('/vanta')
-      ? `${cleanAppUrl}/join/${roomId}`
-      : `${cleanAppUrl}/vanta/join/${roomId}`;
+    const hasVantaPath = window.location.pathname.startsWith('/vanta') || cleanAppUrl.includes('/vanta');
+    return hasVantaPath
+      ? (cleanAppUrl.endsWith('/vanta') ? `${cleanAppUrl}/join/${roomId}` : `${cleanAppUrl}/vanta/join/${roomId}`)
+      : `${cleanAppUrl}/join/${roomId}`;
   };
 
   return (

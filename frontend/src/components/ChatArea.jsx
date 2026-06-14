@@ -15,9 +15,12 @@ export default function ChatArea({
   const handleCopyLink = () => {
     const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const cleanAppUrl = appUrl.replace(/\/$/, '');
-    const inviteLink = cleanAppUrl.includes('/vanta')
-      ? `${cleanAppUrl}/join/${roomId}`
-      : `${cleanAppUrl}/vanta/join/${roomId}`;
+    const hasVantaPath = window.location.pathname.startsWith('/vanta') || cleanAppUrl.includes('/vanta');
+    
+    const inviteLink = hasVantaPath
+      ? (cleanAppUrl.endsWith('/vanta') ? `${cleanAppUrl}/join/${roomId}` : `${cleanAppUrl}/vanta/join/${roomId}`)
+      : `${cleanAppUrl}/join/${roomId}`;
+
     navigator.clipboard.writeText(inviteLink);
     showToast('Invite link copied to clipboard!', 'success');
   };

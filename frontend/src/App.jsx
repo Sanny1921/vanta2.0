@@ -8,8 +8,10 @@ import './App.css';
 import './css/UI.css';
 
 function App() {
+  const basename = window.location.pathname.startsWith('/vanta') ? '/vanta' : '';
+
   return (
-    <BrowserRouter basename="/vanta">
+    <BrowserRouter basename={basename}>
       <RoomProvider>
         <UIProvider>
           <Routes>
