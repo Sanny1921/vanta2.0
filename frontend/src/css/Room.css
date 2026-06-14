@@ -2,15 +2,21 @@
 .room-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: var(--visual-height, 100vh);
   background-color: var(--vanta-bg);
   width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
 }
 
 .room-content-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   width: 100%;
   max-width: 850px;
   margin: 0 auto;
@@ -19,6 +25,7 @@
   border-right: 1px solid var(--vanta-border);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
   position: relative;
+  overflow: hidden;
 }
 
 .room-actions {

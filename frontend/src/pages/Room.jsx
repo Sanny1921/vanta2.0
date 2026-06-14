@@ -174,6 +174,31 @@ export default function Room() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Handle mobile visual viewport resizing (keyboard popups)
+  useEffect(() => {
+    if (!window.visualViewport) return;
+
+    const handleViewportChange = () => {
+      const visualHeight = window.visualViewport.height;
+      document.documentElement.style.setProperty('--visual-height', `${visualHeight}px`);
+      // Auto scroll to bottom when virtual keyboard layout changes
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    };
+
+    window.visualViewport.addEventListener('resize', handleViewportChange);
+    window.visualViewport.addEventListener('scroll', handleViewportChange);
+
+    // Initial run
+    handleViewportChange();
+
+    return () => {
+      window.visualViewport.removeEventListener('resize', handleViewportChange);
+      window.visualViewport.removeEventListener('scroll', handleViewportChange);
+    };
+  }, []);
+
   // Handle session recovery and redirects
   useEffect(() => {
     const cachedRoomId = sessionStorage.getItem('vanta_room_id');
