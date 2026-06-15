@@ -25,6 +25,53 @@ export const RoomProvider = ({ children }) => {
     socketService.connect();
   }, []);
 
+  // Listen for mid-session Socket.IO auto-reconnects
+  useEffect(() => {
+    const handleAutoReconnect = (response) => {
+      if (response.error) {
+        console.error('[RoomContext] Auto-reconnect failed:', response.error);
+        // If room is gone, clear local state
+        if (['ROOM_NOT_FOUND', 'ROOM_EXPIRED', 'NOT_A_MEMBER'].includes(response.error)) {
+          setCurrentRoom(null);
+          setRoomUserId(null);
+          setDisplayName('');
+          setIsHost(false);
+          setParticipants([]);
+          setMessages([]);
+          setTotalUsers(0);
+          setRoomSettings(null);
+        }
+        return;
+      }
+
+      // Restore room state silently
+      console.log('[RoomContext] Auto-reconnect restoring state for room:', response.roomId);
+      setCurrentRoom(response.roomId);
+      setRoomUserId(response.roomUserId);
+      setDisplayName(response.displayName || sessionStorage.getItem('vanta_display_name') || '');
+      setIsHost(response.isHost || false);
+      setTotalUsers(response.totalUsers || 0);
+      setRoomSettings(response.settings || null);
+
+      if (response.participants) {
+        setParticipants(response.participants);
+      }
+      if (response.messages) {
+        const historicalMessages = response.messages.map(msg => ({
+          ...msg,
+          type: msg.type || 'user'
+        }));
+        setMessages(historicalMessages);
+      }
+    };
+
+    socketService.onReconnect(handleAutoReconnect);
+
+    return () => {
+      socketService.offReconnect();
+    };
+  }, []);
+
   // Room lifecycle
   const createRoom = useCallback((data) => {
     return new Promise((resolve, reject) => {

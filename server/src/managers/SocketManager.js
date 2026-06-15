@@ -58,6 +58,10 @@ class SocketManager {
         this.handleKickUser(io, socket, data, callback)
       );
 
+      socket.on(SOCKET_EVENTS.RECONNECT_ROOM, (data, callback) =>
+        this.handleReconnectRoom(io, socket, data, callback)
+      );
+
       socket.on('disconnect', () =>
         this.handleDisconnect(io, socket)
       );
@@ -76,9 +80,9 @@ class SocketManager {
         return;
       }
 
-      // Validate token requirement for member limits > 5
-      const memberLimitNum = parseInt(memberLimit) || 5;
-      if (memberLimitNum > 5) {
+      // Validate token requirement for member limits > 15
+      const memberLimitNum = parseInt(memberLimit) || 15;
+      if (memberLimitNum > 15) {
         if (!token || token.trim() === '') {
           callback({ error: 'TOKEN_REQUIRED' });
           return;
@@ -184,7 +188,9 @@ class SocketManager {
       }
 
       // Check if room requires password
-      if (room.password) {
+      // Skip password gate for returning users (they already verified once)
+      const isReturning = roomUserId && roomManager.isReturningUser(roomId, roomUserId);
+      if (room.password && !isReturning) {
         callback({ requiresPassword: true });
         return;
       }
@@ -573,6 +579,80 @@ class SocketManager {
       }
     } catch (error) {
       console.error('[Socket] Error leaving room:', error);
+    }
+  }
+
+  /**
+   * Handle reconnect-room (mid-session Socket.IO reconnect)
+   */
+  handleReconnectRoom(io, socket, data, callback) {
+    try {
+      const { roomId, roomUserId, hostAccessToken, displayName } = data;
+
+      if (!roomId || !roomUserId) {
+        callback({ error: 'INVALID_DATA' });
+        return;
+      }
+
+      const room = roomManager.getRoom(roomId);
+      if (!room) {
+        callback({ error: 'ROOM_NOT_FOUND' });
+        return;
+      }
+
+      if (!roomManager.isRoomActive(roomId)) {
+        callback({ error: 'ROOM_EXPIRED' });
+        return;
+      }
+
+      // Check if user is actually a member of this room
+      if (!roomManager.isReturningUser(roomId, roomUserId)) {
+        callback({ error: 'NOT_A_MEMBER' });
+        return;
+      }
+
+      // Re-attach socket to the existing user record
+      const joinResult = roomManager.addUserToRoom(roomId, socket.id, displayName || 'User', roomUserId, hostAccessToken);
+
+      if (joinResult.error) {
+        callback({ error: joinResult.error });
+        return;
+      }
+
+      // Re-join socket to room namespace
+      socket.join(roomId);
+
+      // Get current room state
+      const messages = messageManager.getActiveMessages(roomId);
+      const participants = roomManager.getRoomUsers(roomId);
+
+      console.log(`[Socket] Reconnected ${displayName || roomUserId} to room ${roomId} (Host: ${joinResult.isHost})`);
+
+      callback({
+        roomId,
+        roomUserId: joinResult.roomUserId,
+        displayName: joinResult.displayName,
+        isHost: joinResult.isHost,
+        totalUsers: joinResult.totalUsers,
+        messages,
+        participants,
+        settings: {
+          roomLifespanMinutes: room.settings.roomLifespanMinutes,
+          autoDeleteMinutes: room.settings.autoDeleteMinutes,
+          maxUsers: room.settings.maxUsers,
+          hasPassword: !!room.password
+        },
+        reconnected: true
+      });
+
+      // Broadcast updated participant list (socket ID changed)
+      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, {
+        participants: roomManager.getRoomUsers(roomId),
+        totalUsers: roomManager.getRoomUserCount(roomId)
+      });
+    } catch (error) {
+      console.error('[Socket] Error handling reconnect:', error);
+      callback({ error: 'RECONNECT_FAILED' });
     }
   }
 

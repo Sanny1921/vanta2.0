@@ -41,7 +41,10 @@ export const SOCKET_EVENTS = {
 
   // Host Moderation / Kick
   KICK_USER: 'kick-user',
-  KICKED_FROM_ROOM: 'kicked-from-room'
+  KICKED_FROM_ROOM: 'kicked-from-room',
+
+  // Reconnection
+  RECONNECT_ROOM: 'reconnect-room'
 };
 
 /**

@@ -223,7 +223,7 @@ class RoomManager {
       if (user && onExpired) {
         onExpired(user);
       }
-    }, 5000); // 5-second grace period
+    }, 45000); // 45-second grace period for page refreshes and network blips
 
     this.pendingDisconnects.set(roomUserId, { timeoutId, socketId, roomId });
   }
@@ -238,6 +238,19 @@ class RoomManager {
       this.pendingDisconnects.delete(roomUserId);
       return true;
     }
+    return false;
+  }
+
+  /**
+   * Check if a user with the given roomUserId is currently in the room
+   * (either active or pending disconnect)
+   */
+  isReturningUser(roomId, roomUserId) {
+    if (!roomUserId) return false;
+    const users = this.roomUsers.get(roomId) || [];
+    if (users.some(u => u.roomUserId === roomUserId)) return true;
+    // Also check pending disconnects (user is mid-reconnect)
+    if (this.pendingDisconnects.has(roomUserId)) return true;
     return false;
   }
 
