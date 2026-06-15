@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useRoom } from '../context/RoomContext';
 import { useUI } from '../context/UIContext';
 import socketService from '../services/socketService';
+import { getAppUrl } from '../config/constants';
 import '../css/Home.css';
 
 export default function Home() {
@@ -76,7 +77,7 @@ export default function Home() {
       // Close create modal and show details screen
       setIsCreateModalOpen(false);
 
-      const appUrl = (import.meta.env.VITE_APP_URL || window.location.origin).replace(/\/+$/, '');
+      const appUrl = getAppUrl();
       const resolvedRoomUrl = `${appUrl}/join/${response.roomId}`;
 
       setCreatedRoomData({

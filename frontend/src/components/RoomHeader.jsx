@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useUI } from '../context/UIContext';
+import { getAppUrl } from '../config/constants';
 import '../css/RoomHeader.css';
 
 export default function RoomHeader({
@@ -37,7 +38,7 @@ export default function RoomHeader({
   };
 
   const getInviteLink = () => {
-    const appUrl = (import.meta.env.VITE_APP_URL || window.location.origin).replace(/\/+$/, '');
+    const appUrl = getAppUrl();
     return `${appUrl}/join/${roomId}`;
   };
 

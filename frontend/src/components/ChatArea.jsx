@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useUI } from '../context/UIContext';
+import { getAppUrl } from '../config/constants';
 import '../css/ChatArea.css';
 
 export default function ChatArea({
@@ -13,7 +14,7 @@ export default function ChatArea({
   const hasUserMessages = messages.some(msg => msg.type === 'user');
 
   const handleCopyLink = () => {
-    const appUrl = (import.meta.env.VITE_APP_URL || window.location.origin).replace(/\/+$/, '');
+    const appUrl = getAppUrl();
     const inviteLink = `${appUrl}/join/${roomId}`;
 
     navigator.clipboard.writeText(inviteLink);

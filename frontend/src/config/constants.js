@@ -56,3 +56,15 @@ export const SYSTEM_MESSAGE_TYPES = {
   ROOM_TERMINATION_WARNING: 'room-termination-warning',
   ROOM_TERMINATED: 'room-terminated'
 };
+
+/**
+ * Dynamically determine the application's base URL at runtime.
+ * Handles subpath deployment (e.g., GitHub Pages /vanta) and root-level deployments (Vercel, Local).
+ */
+export const getAppUrl = () => {
+  const origin = window.location.origin;
+  if (window.location.pathname.startsWith('/vanta')) {
+    return `${origin}/vanta`;
+  }
+  return origin;
+};
