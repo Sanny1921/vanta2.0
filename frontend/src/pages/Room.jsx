@@ -174,13 +174,47 @@ export default function Room() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Lock document/body scrolling completely while inside the room page to prevent virtual keyboard upward layout shifts
+  useEffect(() => {
+    const origBodyOverflow = document.body.style.overflow;
+    const origBodyPosition = document.body.style.position;
+    const origBodyHeight = document.body.style.height;
+    const origBodyWidth = document.body.style.width;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    const origHtmlHeight = document.documentElement.style.height;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.height = '100%';
+    document.body.style.width = '100%';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.height = '100%';
+
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.body.style.position = origBodyPosition;
+      document.body.style.height = origBodyHeight;
+      document.body.style.width = origBodyWidth;
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.documentElement.style.height = origHtmlHeight;
+    };
+  }, []);
+
   // Handle mobile visual viewport resizing (keyboard popups)
   useEffect(() => {
     if (!window.visualViewport) return;
 
     const handleViewportChange = () => {
       const visualHeight = window.visualViewport.height;
+      const offsetTop = window.visualViewport.offsetTop;
+
       document.documentElement.style.setProperty('--visual-height', `${visualHeight}px`);
+      document.documentElement.style.setProperty('--visual-top', `${offsetTop}px`);
+      
+      // Prevent automatic browser scroll adjustment
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+
       // Auto scroll to bottom when virtual keyboard layout changes
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
