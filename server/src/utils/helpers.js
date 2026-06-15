@@ -1,10 +1,26 @@
+import crypto from 'crypto';
+
 /**
- * Generate a unique ID
+ * Generate a unique ID using cryptographically secure random bytes
  */
 export const generateId = (prefix = '') => {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 8);
-  return prefix ? `${prefix}${timestamp}${random}`.toUpperCase() : `${timestamp}${random}`.toUpperCase();
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const bytes = crypto.randomBytes(12);
+  let random = '';
+  for (let i = 0; i < 12; i++) {
+    random += chars[bytes[i] % chars.length];
+  }
+  return prefix ? `${prefix}${random}` : random;
+};
+
+/**
+ * Sanitize text input: strip HTML tags and restrict to max length
+ */
+export const sanitizeContent = (text, maxLength = 2000) => {
+  if (typeof text !== 'string') return '';
+  // Strip HTML/script tags
+  const clean = text.replace(/<[^>]*>/g, '');
+  return clean.substring(0, maxLength);
 };
 
 /**

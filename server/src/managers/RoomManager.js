@@ -36,9 +36,18 @@ class RoomManager {
       settings = { ...DEFAULT_ROOM_SETTINGS };
     }
 
-    // Use the memberLimit if provided, capping it at the maximum allowed by settings
+    // Use the memberLimit if provided
     if (memberLimit) {
-      settings.maxUsers = Math.min(memberLimit, settings.maxUsers);
+      const limitVal = parseInt(memberLimit);
+      if (!isNaN(limitVal) && limitVal >= 2 && limitVal <= 1000) {
+        if (token) {
+          // If a token is provided, clamp by the token's maximum allowed capacity
+          settings.maxUsers = Math.min(limitVal, settings.maxUsers);
+        } else {
+          // If no token is provided, respect the user's limit (up to the free tier limit of 15)
+          settings.maxUsers = Math.min(limitVal, 15);
+        }
+      }
     }
 
     const hostAccessToken = generateId('HOST');
@@ -119,6 +128,21 @@ class RoomManager {
   addUserToRoom(roomId, socketId, displayName, roomUserId = null, hostAccessToken = null) {
     const room = this.rooms.get(roomId);
     if (!room) return null;
+
+    // Validate display name
+    if (!displayName || typeof displayName !== 'string' || displayName.trim() === '') {
+      return { error: 'INVALID_DISPLAY_NAME' };
+    }
+
+    const cleanName = displayName.trim();
+    if (cleanName.length > 20) {
+      return { error: 'Username is too long (max 20 characters)' };
+    }
+
+    const reservedNames = ['host', 'admin', 'moderator', 'system', 'vanta'];
+    if (reservedNames.includes(cleanName.toLowerCase())) {
+      return { error: 'This username is reserved' };
+    }
 
     const users = this.roomUsers.get(roomId) || [];
 
@@ -317,6 +341,16 @@ class RoomManager {
     for (const [socketId, info] of this.socketMap.entries()) {
       if (info.roomId === roomId) {
         this.socketMap.delete(socketId);
+      }
+    }
+
+    // Clean up pending disconnects
+    for (const [userId, info] of this.pendingDisconnects.entries()) {
+      if (info.roomId === roomId) {
+        if (info.timeoutId) {
+          clearTimeout(info.timeoutId);
+        }
+        this.pendingDisconnects.delete(userId);
       }
     }
 

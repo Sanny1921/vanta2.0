@@ -1,4 +1,4 @@
-import { validatePassword } from '../utils/helpers.js';
+import { validatePassword, sanitizeContent } from '../utils/helpers.js';
 import {
   SOCKET_EVENTS,
   SYSTEM_MESSAGE_TYPES,
@@ -8,6 +8,28 @@ import roomManager from './RoomManager.js';
 import messageManager from './MessageManager.js';
 import lifecycleManager from './LifecycleManager.js';
 import tokenManager from './TokenManager.js';
+
+// In-memory rate limiting map: key -> { messages: [timestamps], actions: [timestamps] }
+const rateLimits = new Map();
+
+/**
+ * Check rate limit for a key
+ * @returns {boolean} true if request is allowed, false if rate limited
+ */
+const checkRateLimit = (key, limit, windowMs, type = 'actions') => {
+  const now = Date.now();
+  if (!rateLimits.has(key)) {
+    rateLimits.set(key, { messages: [], actions: [] });
+  }
+  const limits = rateLimits.get(key);
+  const activeRecords = limits[type].filter(ts => now - ts < windowMs);
+  if (activeRecords.length >= limit) {
+    return false;
+  }
+  activeRecords.push(now);
+  limits[type] = activeRecords;
+  return true;
+};
 
 class SocketManager {
   /**
@@ -75,8 +97,32 @@ class SocketManager {
     try {
       const { hostDisplayName, token, memberLimit, password } = data;
 
-      if (!hostDisplayName || hostDisplayName.trim() === '') {
+      // Rate limiting: Max 3 creations per minute per IP
+      const clientIp = socket.handshake.address || socket.id;
+      if (!checkRateLimit(clientIp, 3, 60000, 'actions')) {
+        callback({ error: 'Too many room creations. Please wait.' });
+        return;
+      }
+
+      if (!hostDisplayName || typeof hostDisplayName !== 'string' || hostDisplayName.trim() === '') {
         callback({ error: 'INVALID_DISPLAY_NAME' });
+        return;
+      }
+
+      const cleanName = hostDisplayName.trim();
+      if (cleanName.length > 20) {
+        callback({ error: 'Username is too long (max 20 characters)' });
+        return;
+      }
+
+      const reservedNames = ['host', 'admin', 'moderator', 'system', 'vanta'];
+      if (reservedNames.includes(cleanName.toLowerCase())) {
+        callback({ error: 'This username is reserved' });
+        return;
+      }
+
+      if (password && password.length > 50) {
+        callback({ error: 'Password is too long (max 50 characters)' });
         return;
       }
 
@@ -99,7 +145,7 @@ class SocketManager {
       // Create room
       const creationResult = roomManager.createRoom(
         socket.id,
-        hostDisplayName,
+        cleanName,
         token,
         memberLimit
       );
@@ -169,8 +215,27 @@ class SocketManager {
     try {
       const { roomId, displayName, roomUserId, hostAccessToken } = data;
 
-      if (!roomId || !displayName || displayName.trim() === '') {
+      // Rate limiting: Max 5 join attempts per 10 seconds per IP
+      const clientIp = socket.handshake.address || socket.id;
+      if (!checkRateLimit(clientIp, 5, 10000, 'actions')) {
+        callback({ error: 'Too many join attempts. Please wait.' });
+        return;
+      }
+
+      if (!roomId || !displayName || typeof displayName !== 'string' || displayName.trim() === '') {
         callback({ error: 'INVALID_DATA' });
+        return;
+      }
+
+      const cleanName = displayName.trim();
+      if (cleanName.length > 20) {
+        callback({ error: 'Username is too long (max 20 characters)' });
+        return;
+      }
+
+      const reservedNames = ['host', 'admin', 'moderator', 'system', 'vanta'];
+      if (reservedNames.includes(cleanName.toLowerCase())) {
+        callback({ error: 'This username is reserved' });
         return;
       }
 
@@ -196,7 +261,7 @@ class SocketManager {
       }
 
       // Add user to room
-      const joinResult = roomManager.addUserToRoom(roomId, socket.id, displayName, roomUserId, hostAccessToken);
+      const joinResult = roomManager.addUserToRoom(roomId, socket.id, cleanName, roomUserId, hostAccessToken);
 
       if (joinResult.error) {
         callback({ error: joinResult.error, ...joinResult });
@@ -261,8 +326,31 @@ class SocketManager {
     try {
       const { roomId, displayName, password, roomUserId, hostAccessToken } = data;
 
-      if (!roomId || !displayName) {
+      // Rate limiting: Max 5 attempts per 10 seconds per IP
+      const clientIp = socket.handshake.address || socket.id;
+      if (!checkRateLimit(clientIp, 5, 10000, 'actions')) {
+        callback({ error: 'Too many join attempts. Please wait.' });
+        return;
+      }
+
+      if (!roomId || !displayName || typeof displayName !== 'string') {
         callback({ error: 'INVALID_DATA' });
+        return;
+      }
+
+      const cleanName = displayName.trim();
+      if (cleanName.length > 20) {
+        callback({ error: 'Username is too long (max 20 characters)' });
+        return;
+      }
+
+      if (['host', 'admin', 'moderator', 'system', 'vanta'].includes(cleanName.toLowerCase())) {
+        callback({ error: 'This username is reserved' });
+        return;
+      }
+
+      if (password && password.length > 50) {
+        callback({ error: 'Password is too long (max 50 characters)' });
         return;
       }
 
@@ -280,7 +368,7 @@ class SocketManager {
       }
 
       // Password correct (or rejoining), add user to room
-      const joinResult = roomManager.addUserToRoom(roomId, socket.id, displayName, roomUserId, hostAccessToken);
+      const joinResult = roomManager.addUserToRoom(roomId, socket.id, cleanName, roomUserId, hostAccessToken);
 
       if (joinResult.error) {
         callback({ error: joinResult.error, ...joinResult });
@@ -342,7 +430,7 @@ class SocketManager {
    */
   handleMessageSend(io, socket, data) {
     try {
-      const { roomId, senderDisplayName, content } = data;
+      const { roomId, content } = data;
 
       if (!roomId || !content || content.trim() === '') {
         return;
@@ -356,16 +444,41 @@ class SocketManager {
         return;
       }
 
+      // Verify membership
       const socketInfo = roomManager.getSocketInfo(socket.id);
-      const senderUserId = socketInfo ? socketInfo.userId : socket.id;
+      if (!socketInfo || socketInfo.roomId !== roomId) {
+        socket.emit(SOCKET_EVENTS.MESSAGE_RECEIVED, {
+          error: 'UNAUTHORIZED_MEMBER'
+        });
+        return;
+      }
+
+      // Rate limiting: Max 5 messages per 2 seconds per socket
+      if (!checkRateLimit(socket.id, 5, 2000, 'messages')) {
+        socket.emit(SOCKET_EVENTS.MESSAGE_RECEIVED, {
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: 'You are sending messages too fast.'
+        });
+        return;
+      }
+
+      // Enforce server-side user details
+      const senderUserId = socketInfo.userId;
+      const senderDisplayName = socketInfo.displayName;
       const isHost = senderUserId === room.hostUserId;
+
+      // Sanitize and limit message content
+      const sanitizedContent = sanitizeContent(content, 2000);
+      if (!sanitizedContent || sanitizedContent.trim() === '') {
+        return;
+      }
 
       // Create message
       const message = messageManager.createMessage(
         roomId,
         senderUserId,
         senderDisplayName,
-        content,
+        sanitizedContent,
         room.autoDeleteMs,
         isHost
       );
@@ -400,6 +513,13 @@ class SocketManager {
         return;
       }
 
+      // Verify membership
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo || socketInfo.roomId !== roomId) {
+        callback({ error: 'UNAUTHORIZED' });
+        return;
+      }
+
       const participants = roomManager.getRoomUsers(roomId);
       callback({ participants });
     } catch (error) {
@@ -428,7 +548,9 @@ class SocketManager {
 
       // Check if user is host
       const { hostAccessToken } = data;
-      const isHost = (room.hostId === socket.id) || (hostAccessToken && hostAccessToken === room.hostAccessToken);
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      const isHost = (socketInfo && socketInfo.userId === room.hostUserId) ||
+                     (hostAccessToken && hostAccessToken === room.hostAccessToken);
       if (!isHost) {
         callback({ error: 'NOT_HOST' });
         return;
@@ -468,7 +590,9 @@ class SocketManager {
       }
 
       // Check if requester is host
-      const isHost = (room.hostId === socket.id) || (hostAccessToken && hostAccessToken === room.hostAccessToken);
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      const isHost = (socketInfo && socketInfo.userId === room.hostUserId) ||
+                     (hostAccessToken && hostAccessToken === room.hostAccessToken);
       if (!isHost) {
         if (callback) callback({ error: 'NOT_HOST' });
         return;
@@ -523,24 +647,27 @@ class SocketManager {
    * Handle typing start
    */
   handleTypingStart(io, socket, data) {
-    const { roomId, displayName } = data;
-    if (roomId) {
-      io.to(roomId).emit(SOCKET_EVENTS.TYPING_START, {
-        displayName
-      });
-    }
+    const { roomId } = data;
+    if (!roomId) return;
+
+    const socketInfo = roomManager.getSocketInfo(socket.id);
+    if (!socketInfo || socketInfo.roomId !== roomId) return;
+
+    io.to(roomId).emit(SOCKET_EVENTS.TYPING_START, {
+      displayName: socketInfo.displayName
+    });
   }
 
-  /**
-   * Handle typing stop
-   */
   handleTypingStop(io, socket, data) {
-    const { roomId, displayName } = data;
-    if (roomId) {
-      io.to(roomId).emit(SOCKET_EVENTS.TYPING_STOP, {
-        displayName
-      });
-    }
+    const { roomId } = data;
+    if (!roomId) return;
+
+    const socketInfo = roomManager.getSocketInfo(socket.id);
+    if (!socketInfo || socketInfo.roomId !== roomId) return;
+
+    io.to(roomId).emit(SOCKET_EVENTS.TYPING_STOP, {
+      displayName: socketInfo.displayName
+    });
   }
 
   /**
