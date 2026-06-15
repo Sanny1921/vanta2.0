@@ -76,10 +76,8 @@ export default function Home() {
       // Close create modal and show details screen
       setIsCreateModalOpen(false);
       
-      const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
-      const resolvedRoomUrl = response.roomUrl && response.roomUrl.startsWith('http')
-        ? response.roomUrl
-        : `${appUrl}${response.roomUrl || `/join/${response.roomId}`}`;
+      const appUrl = (import.meta.env.VITE_APP_URL || window.location.origin).replace(/\/+$/, '');
+      const resolvedRoomUrl = `${appUrl}/join/${response.roomId}`;
 
       setCreatedRoomData({
         roomId: response.roomId,

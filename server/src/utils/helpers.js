@@ -11,10 +11,11 @@ export const generateId = (prefix = '') => {
  * Generate room URL
  */
 export const generateRoomUrl = (roomId, baseUrl = process.env.CLIENT_URL || process.env.APP_URL) => {
-  if (!baseUrl) {
+  if (!baseUrl || baseUrl === '*') {
     return `/join/${roomId}`;
   }
-  return `${baseUrl}/join/${roomId}`;
+  const cleanUrl = baseUrl.replace(/\*+/g, '').replace(/\/+$/, '');
+  return `${cleanUrl}/join/${roomId}`;
 };
 
 /**

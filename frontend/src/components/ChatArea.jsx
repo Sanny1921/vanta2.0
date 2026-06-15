@@ -13,13 +13,8 @@ export default function ChatArea({
   const hasUserMessages = messages.some(msg => msg.type === 'user');
 
   const handleCopyLink = () => {
-    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
-    const cleanAppUrl = appUrl.replace(/\/$/, '');
-    const hasVantaPath = window.location.pathname.startsWith('/vanta') || cleanAppUrl.includes('/vanta');
-    
-    const inviteLink = hasVantaPath
-      ? (cleanAppUrl.endsWith('/vanta') ? `${cleanAppUrl}/join/${roomId}` : `${cleanAppUrl}/vanta/join/${roomId}`)
-      : `${cleanAppUrl}/join/${roomId}`;
+    const appUrl = (import.meta.env.VITE_APP_URL || window.location.origin).replace(/\/+$/, '');
+    const inviteLink = `${appUrl}/join/${roomId}`;
 
     navigator.clipboard.writeText(inviteLink);
     showToast('Invite link copied to clipboard!', 'success');
