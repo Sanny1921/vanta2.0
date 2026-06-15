@@ -215,10 +215,13 @@ export default function Room() {
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
 
-      // Auto scroll to bottom when virtual keyboard layout changes
+      // Snap to bottom instantly to avoid smooth scroll animations fighting the viewport resize
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      
+      // Secondary snap in next tick to ensure layout has fully settled
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 30);
     };
 
     window.visualViewport.addEventListener('resize', handleViewportChange);
