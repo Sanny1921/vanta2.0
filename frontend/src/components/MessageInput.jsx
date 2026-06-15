@@ -255,10 +255,12 @@ export default function MessageInput({
 
     // Set new timeout
     typingTimeoutRef.current = setTimeout(() => {
-      if (isTyping) {
-        setIsTyping(false);
-        onTypingStop();
-      }
+      setIsTyping((prev) => {
+        if (prev) {
+          onTypingStop();
+        }
+        return false;
+      });
     }, 1000);
   };
 

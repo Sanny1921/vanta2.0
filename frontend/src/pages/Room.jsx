@@ -41,6 +41,7 @@ export default function Room() {
   const [activeModal, setActiveModal] = useState(null); // 'participants' | 'details' | 'manage' | null
   const [roomDeleted, setRoomDeleted] = useState(false);
   const messagesEndRef = useRef(null);
+  const hasSynced = useRef(false);
   const [rejoining, setRejoining] = useState(() => {
     const cachedRoomId = sessionStorage.getItem('vanta_room_id');
     const cachedDisplayName = sessionStorage.getItem('vanta_display_name');
@@ -210,14 +211,14 @@ export default function Room() {
 
       document.documentElement.style.setProperty('--visual-height', `${visualHeight}px`);
       document.documentElement.style.setProperty('--visual-top', `${offsetTop}px`);
-      
+
       // Prevent automatic browser scroll adjustment
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
 
       // Snap to bottom instantly to avoid smooth scroll animations fighting the viewport resize
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-      
+
       // Secondary snap in next tick to ensure layout has fully settled
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
@@ -257,6 +258,7 @@ export default function Room() {
         })
           .then(() => {
             setRejoining(false);
+            hasSynced.current = true;
           })
           .catch((err) => {
             console.error('[Room] Rejoin failed:', err);
@@ -273,8 +275,23 @@ export default function Room() {
     } else if (currentRoom !== roomId) {
       // Room mismatch
       navigate('/');
+    } else if (!hasSynced.current) {
+      // Sync local room state with the server if we already entered/created the room context
+      // but haven't fetched the latest participants/messages since component mount.
+      joinRoom({
+        roomId,
+        displayName: cachedDisplayName || displayName,
+        roomUserId: cachedRoomUserId || roomUserId,
+        hostAccessToken: cachedHostAccessToken
+      })
+        .then(() => {
+          hasSynced.current = true;
+        })
+        .catch((err) => {
+          console.error('[Room] Sync failed:', err);
+        });
     }
-  }, [currentRoom, roomId, joinRoom, navigate]);
+  }, [currentRoom, roomId, joinRoom, navigate, displayName, roomUserId]);
 
   const handleLeaveRoom = () => {
     showConfirm({

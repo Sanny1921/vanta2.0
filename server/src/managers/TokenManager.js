@@ -53,7 +53,7 @@ class TokenManager {
    * @param {string} token - Token to validate
    * @returns {object} Validation result with applied perks or default settings
    */
-  validateToken(token) {
+  validateToken(token, decrement = true) {
     if (!token || token.trim() === '') {
       return {
         valid: false,
@@ -73,7 +73,9 @@ class TokenManager {
     }
 
     // Decrement uses
-    tokenData.usesLeft--;
+    if (decrement) {
+      tokenData.usesLeft--;
+    }
 
     return {
       valid: true,

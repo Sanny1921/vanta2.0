@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useUI } from '../context/UIContext';
-import { getAppUrl, validateInviteLink } from '../config/constants';
+import { getAppUrl } from '../config/constants';
 import '../css/ChatArea.css';
 
 export default function ChatArea({
@@ -16,10 +16,6 @@ export default function ChatArea({
   const handleCopyLink = () => {
     const appUrl = getAppUrl();
     const inviteLink = `${appUrl}/join/${roomId}`;
-
-    if (!validateInviteLink(inviteLink, roomId)) {
-      console.error('URL Validation Failed: invite link is polluted!', inviteLink);
-    }
 
     navigator.clipboard.writeText(inviteLink);
     showToast('Invite link copied to clipboard!', 'success');

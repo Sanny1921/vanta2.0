@@ -163,7 +163,7 @@ class RoomManager {
 
       // Update user details
       user.socketId = socketId;
-      this.socketMap.set(socketId, { roomId, userId: roomUserId });
+      this.socketMap.set(socketId, { roomId, userId: roomUserId, displayName: user.displayName });
 
       // Restore host privileges if they are verified
       const isHost = (roomUserId === room.hostUserId) || (hostAccessToken && hostAccessToken === room.hostAccessToken);
@@ -205,7 +205,7 @@ class RoomManager {
 
     users.push(newUser);
     this.roomUsers.set(roomId, users);
-    this.socketMap.set(socketId, { roomId, userId: actualUserId });
+    this.socketMap.set(socketId, { roomId, userId: actualUserId, displayName });
 
     return {
       roomUserId: actualUserId,
@@ -226,7 +226,7 @@ class RoomManager {
       const user = users[userIndex];
       // Clean up any pending disconnects
       this.clearPendingDisconnect(user.roomUserId);
-      
+
       users.splice(userIndex, 1);
       this.roomUsers.set(roomId, users);
       this.socketMap.delete(socketId);

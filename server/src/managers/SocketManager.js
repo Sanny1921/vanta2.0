@@ -135,7 +135,7 @@ class SocketManager {
         }
 
         // Validate token
-        const tokenValidation = tokenManager.validateToken(token);
+        const tokenValidation = tokenManager.validateToken(token, false);
         if (!tokenValidation.valid) {
           callback({ error: 'INVALID_TOKEN' });
           return;
@@ -260,6 +260,10 @@ class SocketManager {
         return;
       }
 
+      // Get room users before joining
+      const participantsBefore = roomManager.getRoomUsers(roomId);
+      console.log(`[SyncLog] Room ${roomId} participant list BEFORE join:`, JSON.stringify(participantsBefore));
+
       // Add user to room
       const joinResult = roomManager.addUserToRoom(roomId, socket.id, cleanName, roomUserId, hostAccessToken);
 
@@ -273,26 +277,30 @@ class SocketManager {
 
       // Get room messages
       const messages = messageManager.getActiveMessages(roomId);
-      const participants = roomManager.getRoomUsers(roomId);
+      const participantsAfter = roomManager.getRoomUsers(roomId);
+
+      console.log(`[SyncLog] Room ${roomId} participant list AFTER join:`, JSON.stringify(participantsAfter));
 
       console.log(
         `[Socket] ${displayName} joined room ${roomId}. Total users: ${joinResult.totalUsers}`
       );
 
-      callback({
+      const snapshotJoined = {
         roomId,
         roomUserId: joinResult.roomUserId,
         displayName,
         totalUsers: joinResult.totalUsers,
         messages,
-        participants,
+        participants: participantsAfter,
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
           maxUsers: room.settings.maxUsers,
           hasPassword: !!room.password
         }
-      });
+      };
+      console.log(`[SyncLog] Snapshot sent to joining client:`, JSON.stringify(snapshotJoined));
+      callback(snapshotJoined);
 
       // Notify others (only if they didn't just rejoin in-place)
       if (!joinResult.rejoined) {
@@ -309,10 +317,12 @@ class SocketManager {
       }
 
       // Broadcast room users updated event
-      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, {
-        participants: roomManager.getRoomUsers(roomId),
+      const snapshotExisting = {
+        participants: participantsAfter,
         totalUsers: roomManager.getRoomUserCount(roomId)
-      });
+      };
+      console.log(`[SyncLog] Snapshot sent to existing clients:`, JSON.stringify(snapshotExisting));
+      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, snapshotExisting);
     } catch (error) {
       console.error('[Socket] Error joining room:', error);
       callback({ error: 'JOIN_FAILED' });
@@ -367,6 +377,10 @@ class SocketManager {
         return;
       }
 
+      // Get room users before joining
+      const participantsBefore = roomManager.getRoomUsers(roomId);
+      console.log(`[SyncLog] Room ${roomId} participant list BEFORE join:`, JSON.stringify(participantsBefore));
+
       // Password correct (or rejoining), add user to room
       const joinResult = roomManager.addUserToRoom(roomId, socket.id, cleanName, roomUserId, hostAccessToken);
 
@@ -379,26 +393,30 @@ class SocketManager {
       socket.join(roomId);
 
       const messages = messageManager.getActiveMessages(roomId);
-      const participants = roomManager.getRoomUsers(roomId);
+      const participantsAfter = roomManager.getRoomUsers(roomId);
+
+      console.log(`[SyncLog] Room ${roomId} participant list AFTER join:`, JSON.stringify(participantsAfter));
 
       console.log(
         `[Socket] ${displayName} joined password-protected room ${roomId}`
       );
 
-      callback({
+      const snapshotJoined = {
         roomId,
         roomUserId: joinResult.roomUserId,
         displayName,
         totalUsers: joinResult.totalUsers,
         messages,
-        participants,
+        participants: participantsAfter,
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
           maxUsers: room.settings.maxUsers,
           hasPassword: !!room.password
         }
-      });
+      };
+      console.log(`[SyncLog] Snapshot sent to joining client:`, JSON.stringify(snapshotJoined));
+      callback(snapshotJoined);
 
       // Notify others (only if they didn't just rejoin in-place)
       if (!joinResult.rejoined) {
@@ -415,10 +433,12 @@ class SocketManager {
       }
 
       // Broadcast room users updated event
-      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, {
-        participants: roomManager.getRoomUsers(roomId),
+      const snapshotExisting = {
+        participants: participantsAfter,
         totalUsers: roomManager.getRoomUserCount(roomId)
-      });
+      };
+      console.log(`[SyncLog] Snapshot sent to existing clients:`, JSON.stringify(snapshotExisting));
+      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, snapshotExisting);
     } catch (error) {
       console.error('[Socket] Error verifying password:', error);
       callback({ error: 'PASSWORD_VERIFICATION_FAILED' });
@@ -550,7 +570,7 @@ class SocketManager {
       const { hostAccessToken } = data;
       const socketInfo = roomManager.getSocketInfo(socket.id);
       const isHost = (socketInfo && socketInfo.userId === room.hostUserId) ||
-                     (hostAccessToken && hostAccessToken === room.hostAccessToken);
+        (hostAccessToken && hostAccessToken === room.hostAccessToken);
       if (!isHost) {
         callback({ error: 'NOT_HOST' });
         return;
@@ -592,7 +612,16 @@ class SocketManager {
       // Check if requester is host
       const socketInfo = roomManager.getSocketInfo(socket.id);
       const isHost = (socketInfo && socketInfo.userId === room.hostUserId) ||
-                     (hostAccessToken && hostAccessToken === room.hostAccessToken);
+        (hostAccessToken && hostAccessToken === room.hostAccessToken);
+
+      console.log(`[KickLog] Host attempting remove:`, {
+        roomId,
+        hostUserId: room.hostUserId,
+        targetUserId: targetRoomUserId,
+        socketInfo,
+        authorizationResult: isHost
+      });
+
       if (!isHost) {
         if (callback) callback({ error: 'NOT_HOST' });
         return;
@@ -738,6 +767,10 @@ class SocketManager {
         return;
       }
 
+      // Get room users before joining
+      const participantsBefore = roomManager.getRoomUsers(roomId);
+      console.log(`[SyncLog] Room ${roomId} participant list BEFORE join:`, JSON.stringify(participantsBefore));
+
       // Re-attach socket to the existing user record
       const joinResult = roomManager.addUserToRoom(roomId, socket.id, displayName || 'User', roomUserId, hostAccessToken);
 
@@ -751,18 +784,20 @@ class SocketManager {
 
       // Get current room state
       const messages = messageManager.getActiveMessages(roomId);
-      const participants = roomManager.getRoomUsers(roomId);
+      const participantsAfter = roomManager.getRoomUsers(roomId);
+
+      console.log(`[SyncLog] Room ${roomId} participant list AFTER join:`, JSON.stringify(participantsAfter));
 
       console.log(`[Socket] Reconnected ${displayName || roomUserId} to room ${roomId} (Host: ${joinResult.isHost})`);
 
-      callback({
+      const snapshotJoined = {
         roomId,
         roomUserId: joinResult.roomUserId,
         displayName: joinResult.displayName,
         isHost: joinResult.isHost,
         totalUsers: joinResult.totalUsers,
         messages,
-        participants,
+        participants: participantsAfter,
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
@@ -770,13 +805,17 @@ class SocketManager {
           hasPassword: !!room.password
         },
         reconnected: true
-      });
+      };
+      console.log(`[SyncLog] Snapshot sent to joining client:`, JSON.stringify(snapshotJoined));
+      callback(snapshotJoined);
 
       // Broadcast updated participant list (socket ID changed)
-      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, {
-        participants: roomManager.getRoomUsers(roomId),
+      const snapshotExisting = {
+        participants: participantsAfter,
         totalUsers: roomManager.getRoomUserCount(roomId)
-      });
+      };
+      console.log(`[SyncLog] Snapshot sent to existing clients:`, JSON.stringify(snapshotExisting));
+      io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, snapshotExisting);
     } catch (error) {
       console.error('[Socket] Error handling reconnect:', error);
       callback({ error: 'RECONNECT_FAILED' });

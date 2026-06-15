@@ -115,7 +115,7 @@ export const RoomProvider = ({ children }) => {
         } else {
           setCurrentRoom(response.roomId);
           setRoomUserId(response.roomUserId);
-          setDisplayName(data.displayName);
+          setDisplayName(response.displayName || data.displayName);
           const historicalMessages = (response.messages || []).map(msg => ({
             ...msg,
             type: msg.type || 'user'
@@ -130,7 +130,8 @@ export const RoomProvider = ({ children }) => {
           // Save session data to sessionStorage
           sessionStorage.setItem('vanta_room_id', response.roomId);
           sessionStorage.setItem('vanta_room_user_id', response.roomUserId);
-          sessionStorage.setItem('vanta_display_name', data.displayName);
+          sessionStorage.setItem('vanta_display_name', response.displayName || data.displayName);
+          // Preserve hostAccessToken: save if provided, never overwrite with undefined
           if (data.hostAccessToken) {
             sessionStorage.setItem('vanta_host_access_token', data.hostAccessToken);
           }
@@ -150,7 +151,7 @@ export const RoomProvider = ({ children }) => {
         } else {
           setCurrentRoom(response.roomId);
           setRoomUserId(response.roomUserId);
-          setDisplayName(data.displayName);
+          setDisplayName(response.displayName || data.displayName);
           const historicalMessages = (response.messages || []).map(msg => ({
             ...msg,
             type: msg.type || 'user'
@@ -165,7 +166,7 @@ export const RoomProvider = ({ children }) => {
           // Save session data to sessionStorage
           sessionStorage.setItem('vanta_room_id', response.roomId);
           sessionStorage.setItem('vanta_room_user_id', response.roomUserId);
-          sessionStorage.setItem('vanta_display_name', data.displayName);
+          sessionStorage.setItem('vanta_display_name', response.displayName || data.displayName);
           if (data.hostAccessToken) {
             sessionStorage.setItem('vanta_host_access_token', data.hostAccessToken);
           }
