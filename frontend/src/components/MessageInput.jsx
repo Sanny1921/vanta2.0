@@ -277,6 +277,11 @@ export default function MessageInput({
     }
 
     onTypingStop();
+
+    // Refocus input to keep mobile virtual keyboard open
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleAttachment = () => {
@@ -334,6 +339,7 @@ export default function MessageInput({
                 type="button"
                 className={`btn-category ${selectedCategory === cat ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(cat)}
+                onMouseDown={(e) => e.preventDefault()}
               >
                 {cat}
               </button>
@@ -347,6 +353,7 @@ export default function MessageInput({
                 type="button"
                 className="emoji-item-btn"
                 onClick={() => handleEmojiSelect(item.emoji)}
+                onMouseDown={(e) => e.preventDefault()}
                 title={item.name}
               >
                 {item.emoji}
@@ -364,6 +371,7 @@ export default function MessageInput({
           type="button"
           className="btn-attachment"
           onClick={handleAttachment}
+          onMouseDown={(e) => e.preventDefault()}
           disabled={disabled}
           title="Attach file"
         >
@@ -382,6 +390,7 @@ export default function MessageInput({
           type="button"
           className={`btn-emoji ${showEmojiPicker ? 'active' : ''}`}
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          onMouseDown={(e) => e.preventDefault()}
           disabled={disabled}
           title="Add emoji"
         >
@@ -390,6 +399,7 @@ export default function MessageInput({
         <button
           type="submit"
           className="btn-send"
+          onMouseDown={(e) => e.preventDefault()}
           disabled={!message.trim() || disabled}
           title="Send message"
         >
