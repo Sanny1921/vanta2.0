@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useRoom } from '../context/RoomContext';
 import { useUI } from '../context/UIContext';
 import socketService from '../services/socketService';
-import { getAppUrl } from '../config/constants';
+import { getAppUrl, validateInviteLink } from '../config/constants';
 import '../css/Home.css';
 
 export default function Home() {
@@ -79,6 +79,10 @@ export default function Home() {
 
       const appUrl = getAppUrl();
       const resolvedRoomUrl = `${appUrl}/join/${response.roomId}`;
+
+      if (!validateInviteLink(resolvedRoomUrl, response.roomId)) {
+        console.error('URL Validation Failed: invite link is polluted!', resolvedRoomUrl);
+      }
 
       setCreatedRoomData({
         roomId: response.roomId,

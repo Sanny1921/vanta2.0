@@ -7,7 +7,7 @@
       // GitHub Pages SPA redirect fix
       // Converts the path into a query string so index.html can restore it
       // Based on: https://github.com/rafgraph/spa-github-pages
-      var pathSegmentsToKeep = 1; // Keep '/vanta' prefix (1 segment)
+      var pathSegmentsToKeep = window.location.pathname.startsWith('/vanta') ? 1 : 0;
       var l = window.location;
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +

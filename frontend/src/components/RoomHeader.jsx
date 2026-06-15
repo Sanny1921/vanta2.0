@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useUI } from '../context/UIContext';
-import { getAppUrl } from '../config/constants';
+import { getAppUrl, validateInviteLink } from '../config/constants';
 import '../css/RoomHeader.css';
 
 export default function RoomHeader({
@@ -39,7 +39,11 @@ export default function RoomHeader({
 
   const getInviteLink = () => {
     const appUrl = getAppUrl();
-    return `${appUrl}/join/${roomId}`;
+    const inviteLink = `${appUrl}/join/${roomId}`;
+    if (!validateInviteLink(inviteLink, roomId)) {
+      console.error('URL Validation Failed: invite link is polluted!', inviteLink);
+    }
+    return inviteLink;
   };
 
   return (

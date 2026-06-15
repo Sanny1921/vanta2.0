@@ -68,3 +68,25 @@ export const getAppUrl = () => {
   }
   return origin;
 };
+
+/**
+ * Validates that a generated invite link is properly formatted and resolves
+ * to the correct dynamic host and path structure: https://<domain>/join/<ROOM_ID>
+ * with no extra query parameters or path pollution.
+ * 
+ * @param {string} url - The generated invite link to validate.
+ * @param {string} roomId - The expected Room ID.
+ * @returns {boolean}
+ */
+export const validateInviteLink = (url, roomId) => {
+  try {
+    const parsed = new URL(url);
+    const expectedSuffix = `/join/${roomId}`;
+    const cleanPathname = parsed.pathname.replace(/\/$/, '');
+    const matchesPath = cleanPathname.endsWith(expectedSuffix);
+    const hasNoPollution = !parsed.search && !parsed.hash;
+    return matchesPath && hasNoPollution;
+  } catch (e) {
+    return false;
+  }
+};
