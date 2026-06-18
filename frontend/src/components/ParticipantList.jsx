@@ -6,7 +6,7 @@ export default function ParticipantList({
   maxUsers,
   onClose
 }) {
-  const limit = maxUsers || 5;
+  const limit = maxUsers || 15;
   const waitingCount = Math.max(0, limit - participants.length);
 
   return (
@@ -28,7 +28,7 @@ export default function ParticipantList({
                 </span>
               </li>
             ))}
-            
+
             {Array.from({ length: waitingCount }).map((_, idx) => (
               <li key={`waiting-${idx}`} className="participant-item waiting">
                 <span className="status-dot offline">⚪</span>

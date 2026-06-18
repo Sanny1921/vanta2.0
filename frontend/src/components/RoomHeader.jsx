@@ -61,9 +61,9 @@ export default function RoomHeader({
           <div className="vanta-dropdown">
             <div className="dropdown-section">
               <span className="dropdown-section-title">ROOM</span>
-              
-              <button 
-                className="dropdown-item" 
+
+              <button
+                className="dropdown-item"
                 onClick={() => {
                   copyToClipboard(roomId, 'Room ID');
                   setShowDropdown(false);
@@ -74,8 +74,8 @@ export default function RoomHeader({
                 <span className="item-value">{roomId}</span>
               </button>
 
-              <button 
-                className="dropdown-item" 
+              <button
+                className="dropdown-item"
                 onClick={() => {
                   copyToClipboard(getInviteLink(), 'Invite Link');
                   setShowDropdown(false);
@@ -85,19 +85,19 @@ export default function RoomHeader({
                 <span className="item-text">Copy Invite Link</span>
               </button>
 
-              <button 
-                className="dropdown-item" 
+              <button
+                className="dropdown-item"
                 onClick={() => {
                   onShowParticipants();
                   setShowDropdown(false);
                 }}
               >
                 <span className="item-icon">👥</span>
-                <span className="item-text">Participants ({totalUsers}/{maxUsers || 5})</span>
+                <span className="item-text">Participants ({totalUsers}/{maxUsers || 15})</span>
               </button>
 
-              <button 
-                className="dropdown-item" 
+              <button
+                className="dropdown-item"
                 onClick={() => {
                   onShowDetails();
                   setShowDropdown(false);
@@ -112,8 +112,8 @@ export default function RoomHeader({
               <div className="dropdown-section border-top">
                 <span className="dropdown-section-title">HOST OPTIONS</span>
 
-                <button 
-                  className="dropdown-item" 
+                <button
+                  className="dropdown-item"
                   onClick={() => {
                     onShowManageUsers();
                     setShowDropdown(false);
@@ -123,8 +123,8 @@ export default function RoomHeader({
                   <span className="item-text">Manage Users</span>
                 </button>
 
-                <button 
-                  className="dropdown-item danger" 
+                <button
+                  className="dropdown-item danger"
                   onClick={() => {
                     onTerminate();
                     setShowDropdown(false);
@@ -137,8 +137,8 @@ export default function RoomHeader({
             )}
 
             <div className="dropdown-section border-top">
-              <button 
-                className="dropdown-item leave-btn" 
+              <button
+                className="dropdown-item leave-btn"
                 onClick={() => {
                   onLeaveRoom();
                   setShowDropdown(false);

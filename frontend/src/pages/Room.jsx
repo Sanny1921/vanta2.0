@@ -262,10 +262,7 @@ export default function Room() {
           })
           .catch((err) => {
             console.error('[Room] Rejoin failed:', err);
-            sessionStorage.removeItem('vanta_room_id');
-            sessionStorage.removeItem('vanta_room_user_id');
-            sessionStorage.removeItem('vanta_display_name');
-            sessionStorage.removeItem('vanta_host_access_token');
+            clearRoom();
             navigate(`/join/${roomId}`);
           });
       } else {
@@ -289,6 +286,8 @@ export default function Room() {
         })
         .catch((err) => {
           console.error('[Room] Sync failed:', err);
+          clearRoom();
+          navigate(`/join/${roomId}`);
         });
     }
   }, [currentRoom, roomId, joinRoom, navigate, displayName, roomUserId]);

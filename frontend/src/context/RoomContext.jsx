@@ -4,6 +4,16 @@ import socketService from '../services/socketService';
 
 const RoomContext = createContext();
 
+const deduplicateParticipants = (list) => {
+  const seen = new Set();
+  return (list || []).filter(p => {
+    if (!p || !p.roomUserId) return false;
+    if (seen.has(p.roomUserId)) return false;
+    seen.add(p.roomUserId);
+    return true;
+  });
+};
+
 export const RoomProvider = ({ children }) => {
   // Room state
   const [currentRoom, setCurrentRoom] = useState(null);
@@ -50,11 +60,14 @@ export const RoomProvider = ({ children }) => {
       setRoomUserId(response.roomUserId);
       setDisplayName(response.displayName || sessionStorage.getItem('vanta_display_name') || '');
       setIsHost(response.isHost || false);
-      setTotalUsers(response.totalUsers || 0);
       setRoomSettings(response.settings || null);
 
       if (response.participants) {
-        setParticipants(response.participants);
+        const uniqueParticipants = deduplicateParticipants(response.participants);
+        setParticipants(uniqueParticipants);
+        setTotalUsers(uniqueParticipants.length);
+      } else {
+        setTotalUsers(response.totalUsers || 0);
       }
       if (response.messages) {
         const historicalMessages = response.messages.map(msg => ({
@@ -121,10 +134,11 @@ export const RoomProvider = ({ children }) => {
             type: msg.type || 'user'
           }));
           setMessages(historicalMessages);
-          setParticipants(response.participants || []);
-          setTotalUsers(response.totalUsers);
+          const uniqueParticipants = deduplicateParticipants(response.participants);
+          setParticipants(uniqueParticipants);
+          setTotalUsers(uniqueParticipants.length);
           setRoomSettings(response.settings || null);
-          const isUserHost = response.participants?.find(p => p.roomUserId === response.roomUserId)?.isHost || false;
+          const isUserHost = uniqueParticipants.find(p => p.roomUserId === response.roomUserId)?.isHost || false;
           setIsHost(isUserHost);
 
           // Save session data to sessionStorage
@@ -157,10 +171,11 @@ export const RoomProvider = ({ children }) => {
             type: msg.type || 'user'
           }));
           setMessages(historicalMessages);
-          setParticipants(response.participants || []);
-          setTotalUsers(response.totalUsers);
+          const uniqueParticipants = deduplicateParticipants(response.participants);
+          setParticipants(uniqueParticipants);
+          setTotalUsers(uniqueParticipants.length);
           setRoomSettings(response.settings || null);
-          const isUserHost = response.participants?.find(p => p.roomUserId === response.roomUserId)?.isHost || false;
+          const isUserHost = uniqueParticipants.find(p => p.roomUserId === response.roomUserId)?.isHost || false;
           setIsHost(isUserHost);
 
           // Save session data to sessionStorage
@@ -216,8 +231,14 @@ export const RoomProvider = ({ children }) => {
   }, []);
 
   const addUser = useCallback((user) => {
-    setParticipants(prev => [...prev, user]);
-    setTotalUsers(prev => prev + 1);
+    setParticipants(prev => {
+      if (prev.some(p => p.roomUserId === user.roomUserId)) {
+        return prev;
+      }
+      const nextParticipants = [...prev, user];
+      setTotalUsers(nextParticipants.length);
+      return nextParticipants;
+    });
   }, []);
 
   const removeUser = useCallback((roomUserId) => {
@@ -226,15 +247,18 @@ export const RoomProvider = ({ children }) => {
   }, []);
 
   const updateParticipants = useCallback((participantsList, count) => {
-    setParticipants(participantsList || []);
-    setTotalUsers(count || 0);
+    const uniqueParticipants = deduplicateParticipants(participantsList);
+    setParticipants(uniqueParticipants);
+    setTotalUsers(uniqueParticipants.length);
   }, []);
 
   const getParticipants = useCallback(() => {
     if (currentRoom) {
       socketService.getParticipants({ roomId: currentRoom }, (response) => {
         if (response.participants) {
-          setParticipants(response.participants);
+          const uniqueParticipants = deduplicateParticipants(response.participants);
+          setParticipants(uniqueParticipants);
+          setTotalUsers(uniqueParticipants.length);
         }
       });
     }

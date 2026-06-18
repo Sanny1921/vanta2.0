@@ -8,6 +8,7 @@ class SocketService {
     this.isConnected = false;
     this._reconnectCallback = null;
     this._reconnecting = false;
+    this._bufferedListeners = [];
   }
 
   connect() {
@@ -18,6 +19,11 @@ class SocketService {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 10
+    });
+
+    // Register any buffered/previously defined listeners
+    this._bufferedListeners.forEach(({ event, callback }) => {
+      this.socket.on(event, callback);
     });
 
     this.socket.on('connect', () => {
@@ -117,12 +123,22 @@ class SocketService {
   }
 
   on(event, callback) {
+    this._bufferedListeners.push({ event, callback });
     if (this.socket) {
       this.socket.on(event, callback);
     }
   }
 
   off(event, callback) {
+    if (callback) {
+      this._bufferedListeners = this._bufferedListeners.filter(
+        (listener) => !(listener.event === event && listener.callback === callback)
+      );
+    } else {
+      this._bufferedListeners = this._bufferedListeners.filter(
+        (listener) => listener.event !== event
+      );
+    }
     if (this.socket) {
       this.socket.off(event, callback);
     }
