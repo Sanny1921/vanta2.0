@@ -50,11 +50,16 @@ class RoomManager {
       }
     }
 
+    // Track password status in settings for client consumption
+    settings.hasPassword = false;
+
     const hostAccessToken = generateId('HOST');
+    const hostUserId = generateId('USER');
 
     const room = {
       roomId,
       hostId,
+      hostUserId,
       hostDisplayName,
       hostAccessToken,
       createdAt,
@@ -67,19 +72,29 @@ class RoomManager {
       terminatingAt: null
     };
 
+    const hostUser = {
+      roomUserId: hostUserId,
+      socketId: hostId,
+      displayName: hostDisplayName,
+      joinedAt: createdAt
+    };
+
     this.rooms.set(roomId, room);
-    this.roomUsers.set(roomId, []);
+    this.roomUsers.set(roomId, [hostUser]);
+    this.socketMap.set(hostId, { roomId, userId: hostUserId, displayName: hostDisplayName });
 
     return {
       roomId,
       roomUrl: generateRoomUrl(roomId),
       hostId,
+      hostUserId,
       hostAccessToken,
       createdAt,
       settings: {
         roomLifespanMinutes: settings.roomLifespanMinutes,
         autoDeleteMinutes: settings.autoDeleteMinutes,
-        maxUsers: settings.maxUsers
+        maxUsers: settings.maxUsers,
+        hasPassword: false
       }
     };
   }
@@ -91,6 +106,7 @@ class RoomManager {
     const room = this.rooms.get(roomId);
     if (room) {
       room.password = password;
+      room.settings.hasPassword = !!password;
       return true;
     }
     return false;
@@ -127,7 +143,7 @@ class RoomManager {
    */
   addUserToRoom(roomId, socketId, displayName, roomUserId = null, hostAccessToken = null) {
     const room = this.rooms.get(roomId);
-    if (!room) return null;
+    if (!room) return { error: 'ROOM_NOT_FOUND' };
 
     // Validate display name
     if (!displayName || typeof displayName !== 'string' || displayName.trim() === '') {

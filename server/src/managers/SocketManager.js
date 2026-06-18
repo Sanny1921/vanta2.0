@@ -94,6 +94,7 @@ class SocketManager {
    * Handle room creation
    */
   handleCreateRoom(io, socket, data, callback) {
+    let creationResult = null;
     try {
       const { hostDisplayName, token, memberLimit, password } = data;
 
@@ -143,7 +144,7 @@ class SocketManager {
       }
 
       // Create room
-      const creationResult = roomManager.createRoom(
+      creationResult = roomManager.createRoom(
         socket.id,
         cleanName,
         token,
@@ -163,7 +164,7 @@ class SocketManager {
         creationResult.roomId,
         socket.id,
         hostDisplayName,
-        null,
+        creationResult.hostUserId,
         creationResult.hostAccessToken
       );
 
@@ -204,6 +205,14 @@ class SocketManager {
       });
     } catch (error) {
       console.error('[Socket] Error creating room:', error);
+      if (creationResult && creationResult.roomId) {
+        try {
+          roomManager.deleteRoom(creationResult.roomId);
+          console.log(`[Socket] Rolled back and deleted partially created room: ${creationResult.roomId}`);
+        } catch (cleanupError) {
+          console.error('[Socket] Error cleaning up room after creation failure:', cleanupError);
+        }
+      }
       callback({ error: 'CREATION_FAILED' });
     }
   }
