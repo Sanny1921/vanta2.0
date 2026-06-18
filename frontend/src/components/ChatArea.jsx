@@ -25,13 +25,32 @@ export default function ChatArea({
     return name ? name.trim().charAt(0).toUpperCase() : '?';
   };
 
-  // Helper to format system messages cleanly
-  const getSystemIcon = (content) => {
-    if (content.toLowerCase().includes('created')) return '✨';
-    if (content.toLowerCase().includes('joined')) return '👤';
-    if (content.toLowerCase().includes('left')) return '🚪';
-    if (content.toLowerCase().includes('removed') || content.toLowerCase().includes('kick')) return '🚫';
-    return '🔔';
+  // Helper to format system messages cleanly with SVG icons
+  const renderSystemIcon = (content) => {
+    const lowerContent = content.toLowerCase();
+    if (lowerContent.includes('created')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M12 5v14M5 12h14"/></svg>
+      );
+    }
+    if (lowerContent.includes('joined')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+      );
+    }
+    if (lowerContent.includes('left')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      );
+    }
+    if (lowerContent.includes('removed') || lowerContent.includes('kick')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      );
+    }
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    );
   };
 
   return (
@@ -42,7 +61,9 @@ export default function ChatArea({
         {!hasUserMessages && (
           <div className="vanta-empty-state">
             <div className="empty-state-card">
-              <div className="empty-card-icon">✨</div>
+              <div className="empty-card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              </div>
               <h3>Room Created</h3>
               <p>Share the invite link to start the conversation.</p>
               <button onClick={handleCopyLink} className="btn-copy-invite">
@@ -58,7 +79,9 @@ export default function ChatArea({
             return (
               <div key={msg.messageId} className="system-message-row">
                 <div className="system-message-content">
-                  <span className="system-icon">{getSystemIcon(msg.content)}</span>
+                  <span className="system-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    {renderSystemIcon(msg.content)}
+                  </span>
                   <span className="system-text">{msg.content}</span>
                   <span className="system-time">
                     {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -86,7 +109,11 @@ export default function ChatArea({
                 <div className="message-header-info">
                   <span className="message-sender-name">
                     {msg.senderDisplayName}
-                    {msg.isHost && <span className="host-indicator-star">★</span>}
+                    {msg.isHost && (
+                      <span className="host-badge" title="Room Host">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                      </span>
+                    )}
                   </span>
                   <span className="message-timestamp">
                     {new Date(msg.createdAt).toLocaleTimeString([], {

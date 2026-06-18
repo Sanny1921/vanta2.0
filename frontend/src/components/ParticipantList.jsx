@@ -21,7 +21,7 @@ export default function ParticipantList({
           <ul className="participant-list">
             {participants.map((user) => (
               <li key={user.roomUserId} className="participant-item">
-                <span className="status-dot online">🟢</span>
+                <span className="status-dot online"></span>
                 <span className="participant-name">
                   {user.displayName}
                   {user.isHost && <span className="host-badge">(Host)</span>}
@@ -31,7 +31,7 @@ export default function ParticipantList({
 
             {Array.from({ length: waitingCount }).map((_, idx) => (
               <li key={`waiting-${idx}`} className="participant-item waiting">
-                <span className="status-dot offline">⚪</span>
+                <span className="status-dot offline"></span>
                 <span className="participant-name waiting-text">
                   Waiting...
                 </span>

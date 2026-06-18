@@ -166,3 +166,23 @@
     right: 8px;
   }
 }
+
+.item-icon-svg {
+  margin-right: 12px;
+  color: var(--vanta-text-muted);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.dropdown-item:hover .item-icon-svg {
+  color: #ffffff;
+}
+
+.dropdown-item.danger .item-icon-svg {
+  color: var(--vanta-danger);
+}
+
+.dropdown-item.danger:hover .item-icon-svg {
+  color: #ff8787;
+}
+

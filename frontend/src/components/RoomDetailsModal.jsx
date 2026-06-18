@@ -11,7 +11,7 @@ export default function RoomDetailsModal({
 
   // Format message policy
   const autoDeleteMins = settings?.autoDeleteMinutes || 1;
-  const policyText = `Auto-delete after ${autoDeleteMins} minute${autoDeleteMins > 1 ? 's' : ''}`;
+  const policyText = `${autoDeleteMins} min${autoDeleteMins > 1 ? 's' : ''}`;
 
   return (
     <div className="participant-list-overlay" onClick={onClose}>
@@ -21,28 +21,28 @@ export default function RoomDetailsModal({
           <button className="btn-close" onClick={onClose}>✕</button>
         </div>
 
-        <div className="participant-list-content" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '20px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--vanta-border)', paddingBottom: '12px' }}>
-            <span style={{ color: 'var(--vanta-text-secondary)', fontSize: '14px' }}>Created By</span>
-            <span style={{ fontWeight: '600', color: 'var(--vanta-text-primary)' }}>{hostName}</span>
+        <div className="participant-list-content">
+          <div className="details-row">
+            <span className="details-label">Created By</span>
+            <span className="details-chip host">{hostName}</span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--vanta-border)', paddingBottom: '12px' }}>
-            <span style={{ color: 'var(--vanta-text-secondary)', fontSize: '14px' }}>Room Capacity</span>
-            <span style={{ fontWeight: '600', color: 'var(--vanta-text-primary)' }}>
+          <div className="details-row">
+            <span className="details-label">Capacity</span>
+            <span className="details-chip capacity">
               {participants.length} / {settings?.maxUsers || 15}
             </span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--vanta-border)', paddingBottom: '12px' }}>
-            <span style={{ color: 'var(--vanta-text-secondary)', fontSize: '14px' }}>Message Policy</span>
-            <span style={{ fontWeight: '600', color: 'var(--vanta-text-primary)' }}>{policyText}</span>
+          <div className="details-row">
+            <span className="details-label">Retention Policy</span>
+            <span className="details-chip policy">Delete after {policyText}</span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '12px' }}>
-            <span style={{ color: 'var(--vanta-text-secondary)', fontSize: '14px' }}>Privacy Status</span>
-            <span style={{ fontWeight: '600', color: settings?.hasPassword ? '#f87171' : '#4ade80' }}>
-              {settings?.hasPassword ? '🔒 Password Protected' : '🔓 Public'}
+          <div className="details-row">
+            <span className="details-label">Privacy Status</span>
+            <span className={`details-chip ${settings?.hasPassword ? 'private' : 'public'}`}>
+              {settings?.hasPassword ? 'Private' : 'Public'}
             </span>
           </div>
         </div>

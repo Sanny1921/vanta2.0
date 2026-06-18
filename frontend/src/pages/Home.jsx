@@ -1,10 +1,188 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRoom } from '../context/RoomContext';
 import { useUI } from '../context/UIContext';
 import socketService from '../services/socketService';
 import { getAppUrl } from '../config/constants';
 import '../css/Home.css';
+
+function LiveConversationDemo() {
+  const [step, setStep] = useState(0);
+  const messagesContainerRef = useRef(null);
+
+  const steps = [
+    { id: 0, delay: 1000 },  // Room Created
+    { id: 1, delay: 1000 },  // Alex Joined
+    { id: 2, delay: 1200 },  // Alex Message
+    { id: 3, delay: 1000 },  // Sam Joined
+    { id: 4, delay: 1200 },  // Sam Message
+    { id: 5, delay: 1000 },  // Rahul Joined
+    { id: 6, delay: 1200 },  // Rahul Message
+    { id: 7, delay: 1000 },  // Alex Reply
+    { id: 8, delay: 1000 },  // Sam Reply
+    { id: 9, delay: 1200 },  // Rahul Reply
+    { id: 10, delay: 2000 }, // Conversation Finished
+    { id: 11, delay: 2000 }, // Room Expired
+    { id: 12, delay: 1500 }, // Messages Fade
+    { id: 13, delay: 2000 }, // Room Removed (messages fade)
+  ];
+
+  useEffect(() => {
+    const currentStepConfig = steps[step];
+    const timer = setTimeout(() => {
+      setStep((prev) => (prev + 1) % steps.length);
+    }, currentStepConfig ? currentStepConfig.delay : 1000);
+
+    return () => clearTimeout(timer);
+  }, [step]);
+
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      if (step === 0) {
+        messagesContainerRef.current.scrollTop = 0;
+      } else {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [step]);
+
+  const showRoomCreated = step >= 0;
+  const showAlexJoin = step >= 1;
+  const showAlexMsg = step >= 2;
+  const showSamJoin = step >= 3;
+  const showSamMsg = step >= 4;
+  const showRahulJoin = step >= 5;
+  const showRahulMsg = step >= 6;
+  const showAlexMsg2 = step >= 7;
+  const showSamMsg2 = step >= 8;
+  const showRahulMsg2 = step >= 9;
+  const showFinished = step >= 10;
+  const showExpired = step >= 11;
+  const isFading = step >= 12;
+  const showRemoved = step >= 13;
+
+  return (
+    <div className="chat-preview-card">
+      <div className="preview-header">
+        <span className="preview-title">▲ VANTA</span>
+        <div className="preview-status-badge">
+          <span className="pulse-dot"></span>
+          <span>live-preview</span>
+        </div>
+      </div>
+      <div ref={messagesContainerRef} className={`preview-messages ${isFading ? 'fading' : ''}`}>
+        {showRoomCreated && (
+          <div className="preview-system-msg animate-message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M12 5v14M5 12h14" /></svg>
+            Room created
+          </div>
+        )}
+        {showAlexJoin && (
+          <div className="preview-system-msg animate-message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+            Alex joined
+          </div>
+        )}
+        {showAlexMsg && (
+          <div className="preview-user-msg animate-message">
+            <div className="avatar">A</div>
+            <div className="msg-content">
+              <div className="msg-header">Alex</div>
+              <div className="msg-body">Need everyone online in 5 minutes.</div>
+            </div>
+          </div>
+        )}
+        {showSamJoin && (
+          <div className="preview-system-msg animate-message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+            Sam joined
+          </div>
+        )}
+        {showSamMsg && (
+          <div className="preview-user-msg animate-message">
+            <div className="avatar violet">S</div>
+            <div className="msg-content">
+              <div className="msg-header">Sam</div>
+              <div className="msg-body">Joining now.</div>
+            </div>
+          </div>
+        )}
+        {showRahulJoin && (
+          <div className="preview-system-msg animate-message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+            Rahul joined
+          </div>
+        )}
+        {showRahulMsg && (
+          <div className="preview-user-msg animate-message">
+            <div className="avatar gray">R</div>
+            <div className="msg-content">
+              <div className="msg-header">Rahul</div>
+              <div className="msg-body">On my way.</div>
+            </div>
+          </div>
+        )}
+        {showAlexMsg2 && (
+          <div className="preview-user-msg animate-message">
+            <div className="avatar">A</div>
+            <div className="msg-content">
+              <div className="msg-header">Alex</div>
+              <div className="msg-body">Perfect.</div>
+            </div>
+          </div>
+        )}
+        {showSamMsg2 && (
+          <div className="preview-user-msg animate-message">
+            <div className="avatar violet">S</div>
+            <div className="msg-content">
+              <div className="msg-header">Sam</div>
+              <div className="msg-body">Let's start.</div>
+            </div>
+          </div>
+        )}
+        {showRahulMsg2 && (
+          <div className="preview-user-msg animate-message">
+            <div className="avatar gray">R</div>
+            <div className="msg-content">
+              <div className="msg-header">Rahul</div>
+              <div className="msg-body">Ready.</div>
+            </div>
+          </div>
+        )}
+        {showFinished && (
+          <div className="preview-system-msg animate-message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+            Conversation finished
+          </div>
+        )}
+        {showExpired && (
+          <div className="preview-system-msg animate-message warning-sys-msg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            Room expired
+          </div>
+        )}
+
+        {showRemoved && (
+          <div className="preview-expired-overlay">
+            <div className="expired-badge" style={{ borderColor: 'rgba(255, 255, 255, 0.08)', background: 'rgba(8, 7, 12, 0.95)', color: '#ffffff' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>
+              Room removed
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="preview-composer">
+        <button className="preview-btn-attachment" disabled>📎</button>
+        <input type="text" className="composer-input" placeholder="Type a message..." disabled />
+        <button className="preview-btn-emoji" disabled>😀</button>
+        <button className="btn-composer-send" disabled>Send</button>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const navigate = useNavigate();
@@ -190,13 +368,19 @@ export default function Home() {
       <div className="home-container">
         <header className="home-header">
           <h1>Vanta</h1>
-          <p className="tagline">Room Successfully Created</p>
+          <p className="tagline">Your room is ready.</p>
         </header>
 
-        <div className="form-container room-created-card">
-          <h2>Room Details</h2>
+        <div className="room-created-success-card">
+          <h2>Room Created</h2>
 
-          <div className="info-item">
+          <div className="waiting-participants-badge">
+            <span className="pulse-dot"></span>
+            Waiting for participants
+          </div>
+          <p className="waiting-guidance">Share the invite link to begin the conversation.</p>
+
+          <div className="info-item" style={{ textAlign: 'left' }}>
             <span className="info-label">Room ID</span>
             <div className="info-value-group">
               <span className="info-value highlight">{createdRoomData.roomId}</span>
@@ -213,7 +397,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="info-item">
+          <div className="info-item" style={{ textAlign: 'left' }}>
             <span className="info-label">Invite Link</span>
             <div className="info-value-group">
               <span className="info-value truncate">{createdRoomData.roomUrl}</span>
@@ -230,26 +414,29 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="info-item">
-            <span className="info-label">Password</span>
-            <div className="info-value-group">
-              <span className="info-value">
-                {createdRoomData.password
-                  ? (showPassword ? createdRoomData.password : '••••••••')
-                  : 'None'}
-              </span>
-              {createdRoomData.password && (
+          {createdRoomData.password && (
+            <div className="info-item" style={{ textAlign: 'left' }}>
+              <span className="info-label">Password</span>
+              <div className="info-value-group">
+                <span className="info-value">
+                  {showPassword ? createdRoomData.password : '••••••••'}
+                </span>
                 <button
                   type="button"
                   className="btn-eye-small"
                   onClick={() => setShowPassword(!showPassword)}
                   title={showPassword ? "Hide password" : "Show password"}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {showPassword ? '👁️' : '🙈'}
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  )}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="info-grid">
             <div className="info-grid-item">
@@ -277,7 +464,10 @@ export default function Home() {
             <button
               type="button"
               className="btn-secondary"
-              onClick={handleShare}
+              onClick={() => {
+                navigator.clipboard.writeText(createdRoomData.roomUrl);
+                showToast('Invite Link copied to clipboard!', 'success');
+              }}
             >
               Share Link
             </button>
@@ -285,7 +475,7 @@ export default function Home() {
         </div>
 
         <footer className="home-footer">
-          <p>Temporary. Lightweight. Fast.</p>
+          <p>© Vanta</p>
         </footer>
       </div>
     );
@@ -318,269 +508,110 @@ export default function Home() {
       <header id="home" className="hero-section">
         <div className="hero-container-inner">
           <div className="hero-left">
-            <div className="hero-badge">Temporary rooms. Real conversations.</div>
             <h1 className="hero-title">
-              Create. Share.<br />
-              <span className="accent-text">Talk.</span> Leave.
+              Create.<br />
+              Share.<br />
+              Talk.<br />
+              Disappear.
             </h1>
             <p className="hero-description">
-              Vanta is a temporary meeting place on the internet.<br /><br />
-              No accounts. No communities. No permanent history.<br /><br />
-              Just create a room, share a link, and start talking.
+              Built for conversations, not archives.
             </p>
             <div className="hero-buttons">
               <button className="btn-hero-primary" onClick={() => setIsCreateModalOpen(true)}>
-                <span className="btn-icon">⚡</span> Create Room
+                Create Room
               </button>
               <button className="btn-hero-secondary" onClick={() => setIsJoinModalOpen(true)}>
-                Join Room <span className="btn-icon-right">➔</span>
+                Join Room
               </button>
             </div>
-            <div className="hero-features-row">
-              <span className="feature-indicator">
-                <span className="feature-indicator-icon">🛡️</span> No Signup Required
-              </span>
-              <span className="feature-indicator">
-                <span className="feature-indicator-icon">🔒</span> End-to-End Encrypted
-              </span>
-              <span className="feature-indicator">
-                <span className="feature-indicator-icon">⏱️</span> Auto-Delete
-              </span>
-            </div>
+            <p className="hero-supporting-text">
+              We store nothing permanently. Rooms automatically expire.
+            </p>
           </div>
 
           <div className="hero-right">
-            {/* Realistic Chat Room Preview */}
-            <div className="chat-preview-card">
-              <div className="preview-header">
-                <span className="preview-title">VANTA</span>
-                <span className="preview-options">⋮</span>
-              </div>
-              <div className="preview-messages">
-                <div className="preview-system-msg">
-                  <span className="sys-icon">✨</span> Room created - Today, 10:24 AM
-                </div>
-                <div className="preview-system-msg">
-                  <span className="sys-icon">👤</span> Alex joined the room
-                </div>
-                <div className="preview-user-msg">
-                  <div className="avatar">A</div>
-                  <div className="msg-content">
-                    <div className="msg-header">Alex <span className="msg-time">10:24 AM</span></div>
-                    <div className="msg-body">Hey everyone!</div>
-                  </div>
-                </div>
-                <div className="preview-system-msg">
-                  <span className="sys-icon">👤</span> Sam joined the room
-                </div>
-                <div className="preview-user-msg">
-                  <div className="avatar blue">S</div>
-                  <div className="msg-content">
-                    <div className="msg-header">Sam <span className="msg-time">10:25 AM</span></div>
-                    <div className="msg-body">Hello!</div>
-                  </div>
-                </div>
-                <div className="preview-system-msg">
-                  <span className="sys-icon">🚪</span> Rahul left the room
-                </div>
-                <div className="preview-user-msg">
-                  <div className="avatar">A</div>
-                  <div className="msg-content">
-                    <div className="msg-header">Alex <span className="msg-time">10:27 AM</span></div>
-                    <div className="msg-body">Let's start.</div>
-                  </div>
-                </div>
-              </div>
-              <div className="preview-composer">
-                <span className="composer-attach">📎</span>
-                <input type="text" className="composer-input" placeholder="Type a message..." disabled />
-                <span className="composer-emoji">😊</span>
-                <button className="btn-composer-send" disabled>Send</button>
-              </div>
-            </div>
+            <LiveConversationDemo />
           </div>
         </div>
       </header>
 
-      {/* SECTION 2 — HOW VANTA WORKS */}
+      {/* SECTION 3 — HOW IT WORKS */}
       <section id="how-it-works" className="section how-it-works-section">
-        <span className="section-label">SIMPLE & FAST</span>
+        <span className="section-label">HOW IT WORKS</span>
         <h2 className="section-title-new">How Vanta Works</h2>
-        <p className="section-subtitle-new">Start a conversation in four simple steps.</p>
-        <div className="flow-grid-new">
-          <div className="flow-card-new">
-            <div className="card-number">1</div>
-            <div className="card-icon-container">
-              <span className="card-icon-new">⚙️</span>
-            </div>
-            <h3>Create a Room</h3>
-            <p>Choose your room settings and create a temporary space in seconds.</p>
+
+        <div className="how-it-works-grid">
+          <div className="how-step-card">
+            <div className="how-step-number">Step 01</div>
+            <h3>Create Room</h3>
+            <p>Configure room settings and generate an invite link.</p>
           </div>
-          <div className="flow-arrow-new">➔</div>
-          <div className="flow-card-new">
-            <div className="card-number">2</div>
-            <div className="card-icon-container">
-              <span className="card-icon-new">🔗</span>
-            </div>
-            <h3>Share the Link</h3>
-            <p>Share the invite link with anyone you want to bring in.</p>
+          <div className="how-step-card">
+            <div className="how-step-number">Step 02</div>
+            <h3>Share Link</h3>
+            <p>Invite participants instantly.</p>
           </div>
-          <div className="flow-arrow-new">➔</div>
-          <div className="flow-card-new">
-            <div className="card-number">3</div>
-            <div className="card-icon-container">
-              <span className="card-icon-new">💬</span>
-            </div>
-            <h3>Start Talking</h3>
-            <p>Chat in real time. No login needed for you or your participants.</p>
+          <div className="how-step-card">
+            <div className="how-step-number">Step 03</div>
+            <h3>Talk Freely</h3>
+            <p>Communicate without creating accounts.</p>
           </div>
-          <div className="flow-arrow-new">➔</div>
-          <div className="flow-card-new">
-            <div className="card-number">4</div>
-            <div className="card-icon-container">
-              <span className="card-icon-new">🗑️</span>
-            </div>
-            <h3>Leave No Trace</h3>
-            <p>When the room ends, messages disappear automatically.</p>
+          <div className="how-step-card">
+            <div className="how-step-number">Step 04</div>
+            <h3>Room Disappears</h3>
+            <p>The room automatically expires after the conversation ends.</p>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3 — WHY VANTA IS DIFFERENT */}
+      {/* SECTION 4 — WHY VANTA */}
       <section id="why-vanta" className="section why-vanta-section">
-        <div className="why-vanta-inner">
-          <div className="why-vanta-left">
-            <span className="section-label left-aligned">BUILT DIFFERENT</span>
-            <h2 className="section-title-new left-aligned">
-              Why Vanta<br />
-              <span className="accent-text">is Different</span>
-            </h2>
-            <p className="why-vanta-description">
-              Vanta is not built to keep you engaged forever.<br /><br />
-              It's built to help people have meaningful conversations without the baggage.
-            </p>
-          </div>
-          <div className="why-vanta-right">
-            <div className="feature-grid-new">
-              <div className="feature-item-new">
-                <span className="feature-item-icon">👁️‍🗨️</span>
-                <div className="feature-item-text">
-                  <h3>No Permanent History</h3>
-                  <p>Rooms and messages auto-delete. Nothing stays behind.</p>
-                </div>
-              </div>
-              <div className="feature-item-new">
-                <span className="feature-item-icon">⏱️</span>
-                <div className="feature-item-text">
-                  <h3>Temporary by Design</h3>
-                  <p>Every room has an expiry. Everything disappears.</p>
-                </div>
-              </div>
-              <div className="feature-item-new">
-                <span className="feature-item-icon">👤</span>
-                <div className="feature-item-text">
-                  <h3>No Accounts</h3>
-                  <p>Jump in instantly. No signups, no profiles, no hassle.</p>
-                </div>
-              </div>
-              <div className="feature-item-new">
-                <span className="feature-item-icon">⚡</span>
-                <div className="feature-item-text">
-                  <h3>Light & Fast</h3>
-                  <p>Minimal. Clean. Built for speed and simplicity.</p>
-                </div>
-              </div>
-              <div className="feature-item-new">
-                <span className="feature-item-icon">🔒</span>
-                <div className="feature-item-text">
-                  <h3>Privacy First</h3>
-                  <p>End-to-end encrypted rooms to keep your conversations safe.</p>
-                </div>
-              </div>
-              <div className="feature-item-new">
-                <span className="feature-item-icon">👥</span>
-                <div className="feature-item-text">
-                  <h3>No Communities</h3>
-                  <p>No servers. No channels. Just people and conversations.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <span className="section-label">PHILOSOPHY</span>
+        <h2 className="section-title-new">Temporary communication without permanent history.</h2>
 
-      {/* SECTION 4 — WHY CHOOSE VANTA OVER OTHER PLATFORMS */}
-      <section className="section comparison-section">
-        <span className="section-label">THE BETTER CHOICE</span>
-        <h2 className="section-title-new">Why Choose Vanta Over Other Platforms?</h2>
-        <div className="comparison-table-container">
-          <table className="comparison-table">
+        <div className="why-vanta-positioning-intro">
+          <p>
+            Most communication platforms are built around identities, profiles, and permanent history.
+            Vanta is built around the conversation itself.
+          </p>
+          <p className="positioning-steps">
+            Create a room. Invite participants. Have the conversation. Move on.
+          </p>
+        </div>
+
+        <div className="comparison-table-wrapper">
+          <table className="vanta-comparison-table">
             <thead>
               <tr>
-                <th className="th-feature">Feature</th>
-                <th className="th-vanta highlighted-col">Vanta</th>
-                <th>WhatsApp</th>
-                <th>Discord</th>
-                <th>Telegram</th>
-                <th>Google Meet</th>
+                <th>Traditional Platforms</th>
+                <th className="highlighted-header">Vanta</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="td-feature">No Account Required</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
+                <td>Accounts Required</td>
+                <td className="highlighted-cell">No Account Required</td>
               </tr>
               <tr>
-                <td className="td-feature">Temporary Rooms</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
+                <td>Permanent Profiles</td>
+                <td className="highlighted-cell">No Profiles</td>
               </tr>
               <tr>
-                <td className="td-feature">Auto Delete Messages</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
+                <td>Long-Term Message History</td>
+                <td className="highlighted-cell">Temporary Conversations</td>
               </tr>
               <tr>
-                <td className="td-feature">No Permanent History</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
+                <td>Identity-Focused</td>
+                <td className="highlighted-cell">Conversation-Focused</td>
               </tr>
               <tr>
-                <td className="td-feature">Easy Shareable Link</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="check-val">✓</td>
-                <td className="check-val">✓</td>
-                <td className="check-val">✓</td>
-                <td className="check-val">✓</td>
+                <td>Conversations Persist</td>
+                <td className="highlighted-cell">Automatic Expiration</td>
               </tr>
               <tr>
-                <td className="td-feature">Distraction Free</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-              </tr>
-              <tr>
-                <td className="td-feature">Built For Temporary Use</td>
-                <td className="td-vanta highlighted-col"><span className="check-mark">✓</span></td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
-                <td className="cross-val">✕</td>
+                <td>Data Stored Indefinitely</td>
+                <td className="highlighted-cell">Temporary By Design</td>
               </tr>
             </tbody>
           </table>
@@ -610,15 +641,15 @@ export default function Home() {
       <section className="section final-cta-section">
         <div className="final-cta-card">
           <div className="final-cta-left">
-            <h2>Ready to start a conversation?</h2>
-            <p>Create a room in seconds. No signup. No delays.</p>
+            <h2>Not every conversation is meant to last forever.</h2>
+            <p>Create a room. Share a link. Have the conversation. Move on.</p>
           </div>
           <div className="final-cta-right">
             <button className="btn-hero-primary" onClick={() => setIsCreateModalOpen(true)}>
-              <span className="btn-icon">⚡</span> Create Room
+              Create Room
             </button>
             <button className="btn-hero-secondary" onClick={() => setIsJoinModalOpen(true)}>
-              Join Room <span className="btn-icon-right">➔</span>
+              Join Room
             </button>
           </div>
         </div>
@@ -627,27 +658,40 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="new-vanta-footer">
         <div className="footer-top-new">
-          <div className="footer-brand-new">
+          <div className="footer-column brand-column">
             <div className="footer-logo">▲ VANTA</div>
-            <p>Temporary communication without permanent history.</p>
+            <p className="footer-description">Private temporary communication without accounts.</p>
+            <p className="footer-philosophy">Built for conversations, not archives.</p>
           </div>
-          <div className="footer-links-new">
-            <a href="#faq">FAQ</a>
-            <a href="#privacy">Privacy Policy</a>
-            <a href="#terms">Terms of Service</a>
-            <a href="#contact">Contact</a>
+
+          <div className="footer-column">
+            <h4 className="footer-column-title">Product</h4>
+            <ul className="footer-column-links">
+              <li><a href="#how-it-works">How It Works</a></li>
+              <li><a href="#why-vanta">Why Vanta</a></li>
+              <li><a href="#faq">FAQ</a></li>
+            </ul>
           </div>
-          <div className="footer-socials">
-            <a href="https://github.com" aria-label="GitHub" target="_blank" rel="noreferrer">
-              <svg className="social-icon" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
-            </a>
-            <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noreferrer">
-              <svg className="social-icon" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" /></svg>
-            </a>
+
+          <div className="footer-column">
+            <h4 className="footer-column-title">Legal</h4>
+            <ul className="footer-column-links">
+              <li><a href="#privacy">Privacy Policy</a></li>
+              <li><a href="#terms">Terms & Conditions</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-column">
+            <h4 className="footer-column-title">Contact</h4>
+            <ul className="footer-column-links">
+              <li><a href="#contact">Contact</a></li>
+              <li><a href="#support">Support</a></li>
+            </ul>
           </div>
         </div>
+
         <div className="footer-bottom-new">
-          <p>© 2026 Vanta. All rights reserved.</p>
+          <p>© Vanta</p>
         </div>
       </footer>
 
@@ -676,6 +720,7 @@ export default function Home() {
                   required
                   autoFocus
                 />
+                <small className="field-help">Displayed to other participants.</small>
               </div>
 
               <div className="form-group">
@@ -694,8 +739,9 @@ export default function Home() {
                   <option value="1000">No Limit</option>
                 </select>
                 {tokenRequired && (
-                  <small style={{ color: '#ff6b6b' }}>⚠️ Token required for limits above 15</small>
+                  <small style={{ color: '#ff6b6b' }}>Token required for limits above 15</small>
                 )}
+                <small className="field-help">Maximum number of participants allowed in this room.</small>
               </div>
 
               <div className="form-group">
@@ -707,11 +753,12 @@ export default function Home() {
                   value={createForm.password}
                   onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                 />
+                <small className="field-help">Leave empty to create a public room.</small>
               </div>
 
               <div className="form-group">
                 <label htmlFor="token">
-                  Token Key {tokenRequired && <span style={{ color: '#ff6b6b' }}>*</span>}
+                  Premium Token {tokenRequired && <span style={{ color: '#ff6b6b' }}>*</span>}
                   {!tokenRequired && <span style={{ color: '#999' }}>(Optional)</span>}
                 </label>
                 <input
@@ -723,7 +770,7 @@ export default function Home() {
                   required={tokenRequired}
                   style={tokenRequired ? { borderColor: '#ff6b6b' } : {}}
                 />
-                <small>
+                <small className="field-help">
                   {tokenRequired
                     ? "Required: Token unlocks member limits above 5. Example: PREMIUM-001-XYZ"
                     : "Optional: Example tokens: PREMIUM-001-XYZ, EXTENDED-002-ABC, STANDARD-003-DEF"}

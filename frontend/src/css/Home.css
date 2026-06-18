@@ -213,10 +213,10 @@
 }
 
 .hero-title {
-  font-size: 72px;
+  font-size: 64px;
   font-weight: 900;
   line-height: 1.05;
-  letter-spacing: -2.5px;
+  letter-spacing: -2px;
   margin-top: 0;
   margin-bottom: 24px;
   color: #ffffff;
@@ -452,122 +452,117 @@
 .preview-composer {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 20px;
+  gap: 10px;
+  padding: 12px 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(0, 0, 0, 0.15);
 }
 
-.composer-attach, .composer-emoji {
-  color: var(--vanta-text-muted);
-  font-size: 16px;
+.preview-btn-attachment,
+.preview-btn-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: var(--vanta-text-secondary);
+  font-size: 13px;
+  height: 32px;
+  width: 32px;
+  min-width: 32px;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .composer-input {
   flex: 1;
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
   color: var(--vanta-text-primary);
-  font-size: 13px;
+  font-size: 12.5px;
+  height: 32px;
+  box-sizing: border-box;
 }
 
 .btn-composer-send {
   background-color: var(--vanta-accent);
   color: #ffffff;
   border: none;
-  padding: 6px 14px;
+  padding: 0 14px;
+  height: 32px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  opacity: 0.8;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* SECTION 2 — HOW VANTA WORKS */
-.flow-grid-new {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 50px;
-}
-
-.flow-card-new {
-  flex: 1;
-  background: rgba(23, 21, 32, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  padding: 40px 24px;
-  text-align: center;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* SECTION 2 — HOW VANTA WORKS */
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 48px auto 0 auto;
   box-sizing: border-box;
 }
 
-.flow-card-new:hover {
-  border-color: rgba(139, 92, 246, 0.35);
-  transform: translateY(-6px);
-  background: rgba(23, 21, 32, 0.6);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(139, 92, 246, 0.03);
+.how-step-card {
+  background: rgba(23, 21, 32, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 28px 24px;
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
-.flow-card-new .card-number {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--vanta-text-muted);
+.how-step-card:hover {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: rgba(23, 21, 32, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.how-step-number {
+  display: inline-block;
   font-size: 11px;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-icon-container {
-  width: 54px;
-  height: 54px;
-  border-radius: 12px;
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px auto;
-  font-size: 22px;
-  transition: all 0.3s ease;
-}
-
-.flow-card-new:hover .card-icon-container {
-  background: rgba(139, 92, 246, 0.16);
-  border-color: rgba(139, 92, 246, 0.35);
-  transform: scale(1.05);
-}
-
-.flow-card-new h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-top: 0;
+  color: #a78bfa;
+  letter-spacing: 1px;
+  text-transform: uppercase;
   margin-bottom: 12px;
-  color: #ffffff;
 }
 
-.flow-card-new p {
+.how-step-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.how-step-card p {
   font-size: 13.5px;
   color: var(--vanta-text-secondary);
-  line-height: 1.5;
+  line-height: 1.45;
   margin: 0;
 }
 
-.flow-arrow-new {
-  color: rgba(255, 255, 255, 0.15);
-  font-size: 18px;
-  flex-shrink: 0;
-  user-select: none;
+@media (max-width: 1024px) {
+  .how-it-works-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .how-it-works-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* SECTION 3 — WHY VANTA IS DIFFERENT */
@@ -1066,12 +1061,16 @@
   padding: 14px;
   background: var(--vanta-accent);
   color: #ffffff;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 8px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1094,6 +1093,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
 }
 
 .btn-secondary:hover {
@@ -1127,14 +1130,14 @@
 }
 
 .info-item {
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .info-item:last-of-type {
   border-bottom: none;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .info-label {
@@ -1197,9 +1200,9 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin: 25px 0;
+  margin: 16px 0;
   background: var(--vanta-input);
-  padding: 15px;
+  padding: 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
@@ -1223,9 +1226,64 @@
 
 .created-btn-group {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.created-btn-group .btn-primary,
+.created-btn-group .btn-secondary {
+  /* Box dimensions and sizing */
+  height: 48px;
+  box-sizing: border-box;
+  flex: 1;
+  width: auto;
+  margin: 0;
+  
+  /* Padding and Borders */
+  padding: 0 24px;
+  border-radius: 8px;
+  
+  /* Typography */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  
+  /* Layout & Alignment */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Colors & Styles differentiation */
+
+/* Primary: Enter Room */
+.created-btn-group .btn-primary {
+  background: var(--vanta-accent);
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.created-btn-group .btn-primary:hover:not(:disabled) {
+  background: var(--vanta-accent-hover);
+}
+
+/* Secondary: Share Link */
+.created-btn-group .btn-secondary {
+  background: var(--vanta-input);
+  color: var(--vanta-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.created-btn-group .btn-secondary:hover {
+  background: var(--vanta-card);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* RESPONSIVE DESIGN */
@@ -1310,3 +1368,343 @@
     font-size: 32px;
   }
 }
+
+/* REDESIGN EXTRA STYLES */
+.hero-supporting-text {
+  font-size: 13px;
+  color: var(--vanta-text-muted);
+  margin-top: 16px;
+  margin-bottom: 0;
+  letter-spacing: 0.2px;
+}
+
+.preview-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #c084fc;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.preview-messages {
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-expired-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(8, 7, 12, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.expired-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.animate-message {
+  animation: slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Fading transition for Live Demo messages */
+.preview-messages.fading > * {
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+
+.warning-sys-msg {
+  color: #f87171 !important;
+}
+
+/* Positioning Intro */
+.why-vanta-positioning-intro {
+  max-width: 680px;
+  margin: 32px auto 48px auto;
+  text-align: center;
+}
+
+.why-vanta-positioning-intro p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--vanta-text-secondary);
+  margin: 0 0 16px 0;
+}
+
+.why-vanta-positioning-intro p.positioning-steps {
+  font-size: 14px;
+  color: var(--vanta-text-muted);
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Sleek Comparison Table */
+.comparison-table-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(18, 16, 26, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.vanta-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.vanta-comparison-table th,
+.vanta-comparison-table td {
+  padding: 18px 28px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.vanta-comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.vanta-comparison-table th {
+  font-weight: 700;
+  color: var(--vanta-text-muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.vanta-comparison-table td {
+  color: var(--vanta-text-secondary);
+}
+
+.vanta-comparison-table .highlighted-header {
+  color: #a78bfa;
+  font-weight: 800;
+}
+
+.vanta-comparison-table .highlighted-cell {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Subtle row highlighting on hover */
+.vanta-comparison-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.final-cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.footer-philosophy {
+  font-size: 12px;
+  color: var(--vanta-text-muted);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.field-help {
+  display: block;
+  margin-top: 6px;
+  color: var(--vanta-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.room-created-success-card {
+  background: var(--vanta-surface);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 16px;
+  padding: 24px 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+  animation: cardFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.room-created-success-card h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.waiting-guidance {
+  font-size: 13.5px;
+  color: var(--vanta-text-secondary);
+  margin: -4px 0 4px 0;
+  line-height: 1.4;
+}
+
+.waiting-participants-badge {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #c084fc;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #c084fc;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.4; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.4; }
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.brand-column {
+  max-width: 300px;
+}
+
+.footer-column-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.footer-column-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-column-links li {
+  margin: 0;
+  padding: 0;
+}
+
+.footer-column-links a {
+  color: var(--vanta-text-secondary);
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: color 0.2s ease;
+}
+
+.footer-column-links a:hover {
+  color: #ffffff;
+}
+
+.footer-description {
+  font-size: 13px;
+  color: var(--vanta-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .footer-column {
+    align-items: center;
+    text-align: center;
+  }
+  .brand-column {
+    max-width: 100%;
+  }
+  .footer-column-links {
+    align-items: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .vanta-comparison-table th,
+  .vanta-comparison-table td {
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+}
+
+@media (max-height: 850px) {
+  .home-container {
+    padding: 20px;
+  }
+  .home-container .home-header {
+    margin-bottom: 16px;
+  }
+  .home-container .home-header h1 {
+    font-size: 38px;
+  }
+  .room-created-success-card {
+    padding: 20px 28px;
+    gap: 12px;
+  }
+  .info-grid {
+    margin: 10px 0;
+    padding: 8px 10px;
+  }
+}
+
