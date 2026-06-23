@@ -1,6 +1,7 @@
 import { ROOM_LIFECYCLE, SOCKET_EVENTS, SYSTEM_MESSAGE_TYPES } from '../config/constants.js';
 import roomManager from './RoomManager.js';
 import messageManager from './MessageManager.js';
+import { deleteRoomVoiceDir } from '../utils/voiceCleanup.js';
 
 class LifecycleManager {
   constructor() {
@@ -101,9 +102,12 @@ class LifecycleManager {
     // Get all users in room
     const users = roomManager.getUsersInRoom(roomId);
 
-    // Delete room
+    // Delete room and messages
     roomManager.deleteRoom(roomId);
     messageManager.clearRoomMessages(roomId);
+    
+    // Purge all voice messages associated with the room
+    deleteRoomVoiceDir(roomId);
 
     // Stop monitoring
     this.stopMonitoringRoom(roomId);
@@ -140,9 +144,13 @@ class LifecycleManager {
           message: 'Room terminated by host.'
         });
 
-        // Delete room
+        // Delete room and messages
         roomManager.deleteRoom(roomId);
         messageManager.clearRoomMessages(roomId);
+        
+        // Purge all voice messages associated with the room
+        deleteRoomVoiceDir(roomId);
+        
         this.stopMonitoringRoom(roomId);
 
         // Notify all users

@@ -9,6 +9,7 @@
   z-index: 100;
   position: relative;
   height: 64px;
+  flex-shrink: 0;
 }
 
 .room-title {
@@ -20,6 +21,88 @@
   text-transform: uppercase;
 }
 
+/* Right-side control group (voice button + menu) */
+.room-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─── Voice Call Button ───────────────────────────────────────────────────── */
+.voice-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.btn-voice-call {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--vanta-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 5px 8px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  line-height: 1;
+  position: relative;
+}
+
+.btn-voice-call:hover {
+  background-color: var(--vanta-input);
+  color: var(--vanta-text-primary);
+  border-color: var(--vanta-border);
+}
+
+/* Active (in call) state — green glow */
+.btn-voice-call.active {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.35);
+  background-color: rgba(34, 197, 94, 0.08);
+  animation: voiceBtnGlow 2.5s infinite;
+}
+
+@keyframes voiceBtnGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  50%       { box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.12); }
+}
+
+.btn-voice-call.active:hover {
+  background-color: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+/* Participant count badge */
+.voice-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: #22c55e;
+  color: #052e16;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  flex-shrink: 0;
+}
+
+/* ─── Floating Voice Call Panel ───────────────────────────────────────────── */
+.voice-call-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1000;
+}
+
+/* ─── Three-dot Menu Button ───────────────────────────────────────────────── */
 .room-header-right {
   position: relative;
   display: flex;
@@ -46,7 +129,7 @@
   color: #ffffff;
 }
 
-/* Minimalist Dropdown menu */
+/* ─── Minimalist Dropdown ─────────────────────────────────────────────────── */
 .vanta-dropdown {
   position: absolute;
   top: 48px;
@@ -157,16 +240,6 @@
   color: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .room-header {
-    padding: 12px 16px;
-  }
-  
-  .vanta-dropdown {
-    right: 8px;
-  }
-}
-
 .item-icon-svg {
   margin-right: 12px;
   color: var(--vanta-text-muted);
@@ -186,3 +259,19 @@
   color: #ff8787;
 }
 
+/* ─── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .room-header {
+    padding: 12px 16px;
+  }
+
+  .vanta-dropdown {
+    right: 0;
+    min-width: 240px;
+  }
+
+  /* Voice panel anchors to right edge on mobile, never overflows */
+  .voice-call-panel {
+    right: 0;
+  }
+}

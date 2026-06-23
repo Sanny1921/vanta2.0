@@ -201,11 +201,15 @@ const EMOJI_DATA = [
 
 const CATEGORIES = ['All', 'Smileys', 'Gestures', 'Hearts', 'Symbols', 'Animals', 'Food'];
 
+const BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_SOCKET_URL || window.location.origin;
+
 export default function MessageInput({
   onSendMessage,
+  onSendVoiceMessage,
   onTypingStart,
   onTypingStop,
-  disabled
+  disabled,
+  roomId
 }) {
   const [message, setMessage] = useState('');
   const { showToast } = useUI();
@@ -217,8 +221,20 @@ export default function MessageInput({
   const [emojiSearchQuery, setEmojiSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
+  // Voice recording & preview states
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const [previewProgress, setPreviewProgress] = useState(0);
+
   const inputRef = useRef(null);
   const pickerWrapperRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioStreamRef = useRef(null);
+  const recordingTimerRef = useRef(null);
+  const previewAudioRef = useRef(null);
 
   // Close emoji picker when clicking outside of it
   useEffect(() => {
@@ -237,6 +253,215 @@ export default function MessageInput({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Cleanup voice recording resources on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
+  // Start Voice Recording
+  const startRecording = async () => {
+    try {
+      if (disabled) return;
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStreamRef.current = stream;
+
+      let options = {};
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/mp4',
+        'audio/aac'
+      ];
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          options = { mimeType };
+          break;
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mediaRecorder;
+
+      const chunks = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+
+        if (blob.size > 1024 * 1024) {
+          showToast('Recording too large (exceeds 1MB limit). Please record a shorter message.', 'error');
+          discardRecording();
+          return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        setAudioBlob(blob);
+        setAudioUrl(url);
+      };
+
+      setAudioBlob(null);
+      setAudioUrl(null);
+      setRecordingTime(0);
+      setIsRecording(true);
+
+      mediaRecorder.start();
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime((prev) => {
+          if (prev >= 60) {
+            stopRecording();
+            return 60;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error('[MessageInput] getUserMedia error:', err);
+      showToast('Could not access microphone. Please check permissions.', 'error');
+    }
+  };
+
+  // Stop Voice Recording
+  const stopRecording = () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+    }
+
+    setIsRecording(false);
+  };
+
+  // Discard Recording/Preview
+  const discardRecording = () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.onstop = null; // Bypass the async preview state generation
+      mediaRecorderRef.current.stop();
+    }
+
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+    }
+
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+
+    setIsRecording(false);
+    setRecordingTime(0);
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setIsPlayingPreview(false);
+    setPreviewProgress(0);
+  };
+
+  // Preview controls
+  const togglePreviewPlay = () => {
+    if (!previewAudioRef.current) return;
+
+    if (isPlayingPreview) {
+      previewAudioRef.current.pause();
+      setIsPlayingPreview(false);
+    } else {
+      window.dispatchEvent(new CustomEvent('vanta-voice-play', { detail: { messageId: 'preview' } }));
+      previewAudioRef.current.play()
+        .then(() => setIsPlayingPreview(true))
+        .catch(err => console.error('[MessageInput] Preview playback failed:', err));
+    }
+  };
+
+  const handlePreviewTimeUpdate = () => {
+    if (previewAudioRef.current) {
+      setPreviewProgress(previewAudioRef.current.currentTime);
+    }
+  };
+
+  const handlePreviewEnded = () => {
+    setIsPlayingPreview(false);
+    setPreviewProgress(0);
+    if (previewAudioRef.current) {
+      previewAudioRef.current.currentTime = 0;
+    }
+  };
+
+  const handlePreviewSeek = (e) => {
+    const val = parseFloat(e.target.value);
+    if (previewAudioRef.current && !isNaN(val)) {
+      previewAudioRef.current.currentTime = val;
+      setPreviewProgress(val);
+    }
+  };
+
+  // Upload and Send voice message
+  const sendVoiceMessage = async () => {
+    if (!audioBlob || disabled || !roomId) return;
+
+    try {
+      const cleanBaseUrl = BASE_URL.replace(/\/+$/, '');
+      const uploadUrl = `${cleanBaseUrl}/api/rooms/${roomId}/voice-messages`;
+      const roomUserId = sessionStorage.getItem('vanta_room_user_id');
+
+      if (!roomUserId) {
+        throw new Error('Not joined to any room.');
+      }
+
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': audioBlob.type || 'audio/webm',
+          'x-room-user-id': roomUserId
+        },
+        body: audioBlob
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || `Upload failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (onSendVoiceMessage) {
+        onSendVoiceMessage(data.fileUrl, recordingTime);
+      }
+
+      discardRecording();
+    } catch (err) {
+      console.error('[MessageInput] Upload error:', err);
+      showToast(err.message || 'Failed to send voice message.', 'error');
+    }
+  };
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -368,53 +593,132 @@ export default function MessageInput({
         </div>
       )}
 
-      <form className="message-input-form" onSubmit={handleSubmit}>
-        <button
-          type="button"
-          className="btn-attachment"
-          onClick={handleAttachment}
-          onMouseDown={(e) => e.preventDefault()}
-          disabled={disabled}
-          title="Attach file"
-        >
-          📎
-        </button>
-        <input
-          ref={inputRef}
-          type="text"
-          className="message-input"
-          placeholder={disabled ? 'Room deleted...' : 'Type a message...'}
-          value={message}
-          onChange={handleChange}
-          disabled={disabled}
-        />
-        <button
-          type="button"
-          className={`btn-emoji ${showEmojiPicker ? 'active' : ''}`}
-          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          onMouseDown={(e) => e.preventDefault()}
-          disabled={disabled}
-          title="Add emoji"
-        >
-          😀
-        </button>
-        <button
-          type="submit"
-          className="btn-send"
-          onMouseDown={(e) => e.preventDefault()}
-          disabled={!message.trim() || disabled}
-          title="Send message"
-        >
-          Send
-        </button>
-      </form>
+      {isRecording ? (
+        <div className="recording-state-container">
+          <div className="recording-indicator">
+            <span className="pulsing-dot" />
+            <span className="recording-label">Recording: {recordingTime}s / 60s</span>
+          </div>
+          <button type="button" className="btn-discard-voice" onClick={discardRecording}>
+            Discard
+          </button>
+          <button type="button" className="btn-stop-voice" onClick={stopRecording}>
+            Stop & Preview
+          </button>
+        </div>
+      ) : audioUrl ? (
+        <div className="preview-state-container">
+          <div className="voice-preview-controls">
+            <button
+              type="button"
+              className="btn-preview-play-pause"
+              onClick={togglePreviewPlay}
+              title={isPlayingPreview ? 'Pause' : 'Play'}
+            >
+              {isPlayingPreview ? (
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16" rx="1" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max={recordingTime || 100}
+              value={previewProgress}
+              onChange={handlePreviewSeek}
+              className="preview-seeker"
+              style={{
+                background: `linear-gradient(to right, var(--vanta-accent) 0%, var(--vanta-accent) ${(previewProgress / (recordingTime || 1)) * 100}%, rgba(255,255,255,0.08) ${(previewProgress / (recordingTime || 1)) * 100}%, rgba(255,255,255,0.08) 100%)`
+              }}
+            />
+            <span className="preview-time-display">
+              {Math.floor(previewProgress)}s / {recordingTime}s
+            </span>
+          </div>
+          <button type="button" className="btn-discard-voice" onClick={discardRecording}>
+            Discard
+          </button>
+          <button type="button" className="btn-send-voice" onClick={sendVoiceMessage}>
+            Send
+          </button>
+          <audio
+            ref={previewAudioRef}
+            src={audioUrl}
+            onTimeUpdate={handlePreviewTimeUpdate}
+            onEnded={handlePreviewEnded}
+          />
+        </div>
+      ) : (
+        <form className="message-input-form" onSubmit={handleSubmit}>
+          <button
+            type="button"
+            className="btn-attachment"
+            onClick={handleAttachment}
+            onMouseDown={(e) => e.preventDefault()}
+            disabled={disabled}
+            title="Attach file"
+          >
+            📎
+          </button>
+          <input
+            ref={inputRef}
+            type="text"
+            className="message-input"
+            placeholder={disabled ? 'Room deleted...' : 'Type a message...'}
+            value={message}
+            onChange={handleChange}
+            disabled={disabled}
+          />
+          <button
+            type="button"
+            className={`btn-emoji ${showEmojiPicker ? 'active' : ''}`}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            onMouseDown={(e) => e.preventDefault()}
+            disabled={disabled}
+            title="Add emoji"
+          >
+            😀
+          </button>
+          {message.trim() ? (
+            <button
+              type="submit"
+              className="btn-send"
+              onMouseDown={(e) => e.preventDefault()}
+              disabled={disabled}
+              title="Send message"
+            >
+              Send
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn-mic"
+              onClick={startRecording}
+              onMouseDown={(e) => e.preventDefault()}
+              disabled={disabled}
+              title="Record voice message"
+            >
+              🎙️
+            </button>
+          )}
+        </form>
+      )}
     </div>
   );
 }
 
 MessageInput.propTypes = {
   onSendMessage: PropTypes.func.isRequired,
+  onSendVoiceMessage: PropTypes.func.isRequired,
   onTypingStart: PropTypes.func.isRequired,
   onTypingStop: PropTypes.func.isRequired,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  roomId: PropTypes.string.isRequired
 };
+

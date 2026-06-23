@@ -11,6 +11,8 @@ import tokenManager from './TokenManager.js';
 
 // In-memory rate limiting map: key -> { messages: [timestamps], actions: [timestamps] }
 const rateLimits = new Map();
+const MAX_VOICE_PARTICIPANTS = 8;
+const DIAG_PREFIX = '[Diag][SocketManager]';
 
 /**
  * Check rate limit for a key
@@ -32,12 +34,22 @@ const checkRateLimit = (key, limit, windowMs, type = 'actions') => {
 };
 
 class SocketManager {
+  constructor() {
+    this.voiceParticipants = new Map();
+  }
+
   /**
    * Setup all socket event listeners
    */
   setupSocketEvents(io) {
     io.on('connection', (socket) => {
       console.log(`[Socket] User connected: ${socket.id}`);
+      console.log(`${DIAG_PREFIX} socket connected`, {
+        socketId: socket.id,
+        address: socket.handshake.address,
+        origin: socket.handshake.headers.origin,
+        userAgent: socket.handshake.headers['user-agent']
+      });
 
       // Room events
       socket.on(SOCKET_EVENTS.CREATE_ROOM, (data, callback) =>
@@ -84,6 +96,30 @@ class SocketManager {
         this.handleReconnectRoom(io, socket, data, callback)
       );
 
+      socket.on(SOCKET_EVENTS.WEBRTC_OFFER, (data) =>
+        this.handleWebRTCOffer(io, socket, data)
+      );
+
+      socket.on(SOCKET_EVENTS.WEBRTC_ANSWER, (data) =>
+        this.handleWebRTCAnswer(io, socket, data)
+      );
+
+      socket.on(SOCKET_EVENTS.WEBRTC_ICE_CANDIDATE, (data) =>
+        this.handleWebRTCIceCandidate(io, socket, data)
+      );
+
+      socket.on(SOCKET_EVENTS.WEBRTC_INIT, (data) =>
+        this.handleWebRTCInit(io, socket, data)
+      );
+
+      socket.on(SOCKET_EVENTS.VOICE_CALL_JOIN, (data, callback) =>
+        this.handleVoiceCallJoin(io, socket, data, callback)
+      );
+
+      socket.on(SOCKET_EVENTS.VOICE_CALL_LEAVE, () =>
+        this.handleVoiceCallLeave(io, socket)
+      );
+
       socket.on('disconnect', () =>
         this.handleDisconnect(io, socket)
       );
@@ -96,6 +132,24 @@ class SocketManager {
   handleCreateRoom(io, socket, data, callback) {
     let creationResult = null;
     try {
+      const originalCallback = callback;
+      callback = (response) => {
+        console.log(`${DIAG_PREFIX} create-room callback response`, {
+          socketId: socket.id,
+          response
+        });
+        originalCallback(response);
+      };
+      console.log(`${DIAG_PREFIX} create-room handler start`, {
+        socketId: socket.id,
+        connected: socket.connected,
+        origin: socket.handshake.headers.origin,
+        data: {
+          ...data,
+          password: data?.password ? '[present]' : null,
+          token: data?.token ? '[present]' : null
+        }
+      });
       const { hostDisplayName, token, memberLimit, password } = data;
 
       // Rate limiting: Max 3 creations per minute per IP
@@ -185,6 +239,11 @@ class SocketManager {
           hasPassword: !!password
         }
       });
+      console.log(`${DIAG_PREFIX} create-room callback success`, {
+        socketId: socket.id,
+        roomId: creationResult.roomId,
+        roomUserId: joinResult.roomUserId
+      });
 
       // Emit room created event
       io.to(creationResult.roomId).emit(SOCKET_EVENTS.ROOM_JOINED, {
@@ -204,6 +263,11 @@ class SocketManager {
         totalUsers: roomManager.getRoomUserCount(creationResult.roomId)
       });
     } catch (error) {
+      console.error(`${DIAG_PREFIX} create-room handler failure`, {
+        socketId: socket.id,
+        error: error.message,
+        stack: error.stack
+      });
       console.error('[Socket] Error creating room:', error);
       if (creationResult && creationResult.roomId) {
         try {
@@ -222,6 +286,20 @@ class SocketManager {
    */
   handleJoinRoom(io, socket, data, callback) {
     try {
+      const originalCallback = callback;
+      callback = (response) => {
+        console.log(`${DIAG_PREFIX} join-room callback response`, {
+          socketId: socket.id,
+          response
+        });
+        originalCallback(response);
+      };
+      console.log(`${DIAG_PREFIX} join-room handler start`, {
+        socketId: socket.id,
+        connected: socket.connected,
+        origin: socket.handshake.headers.origin,
+        data
+      });
       const { roomId, displayName, roomUserId, hostAccessToken } = data;
 
       // Rate limiting: Max 5 join attempts per 10 seconds per IP
@@ -284,6 +362,11 @@ class SocketManager {
       // Join socket to room
       socket.join(roomId);
 
+      // Emit current voice call participants directly to the joining socket
+      socket.emit(SOCKET_EVENTS.VOICE_CALL_USERS, {
+        participants: this.getVoiceParticipantList(roomId)
+      });
+
       // Get room messages
       const messages = messageManager.getActiveMessages(roomId);
       const participantsAfter = roomManager.getRoomUsers(roomId);
@@ -301,6 +384,7 @@ class SocketManager {
         totalUsers: joinResult.totalUsers,
         messages,
         participants: participantsAfter,
+        voiceParticipants: this.getVoiceParticipantList(roomId),
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
@@ -310,6 +394,13 @@ class SocketManager {
       };
       console.log(`[SyncLog] Snapshot sent to joining client:`, JSON.stringify(snapshotJoined));
       callback(snapshotJoined);
+      console.log(`${DIAG_PREFIX} join-room callback success`, {
+        socketId: socket.id,
+        roomId,
+        roomUserId: joinResult.roomUserId,
+        totalUsers: joinResult.totalUsers,
+        requiresPassword: false
+      });
 
       // Notify others (only if they didn't just rejoin in-place)
       if (!joinResult.rejoined) {
@@ -333,6 +424,11 @@ class SocketManager {
       console.log(`[SyncLog] Snapshot sent to existing clients:`, JSON.stringify(snapshotExisting));
       io.to(roomId).emit(SOCKET_EVENTS.ROOM_USERS_UPDATED, snapshotExisting);
     } catch (error) {
+      console.error(`${DIAG_PREFIX} join-room handler failure`, {
+        socketId: socket.id,
+        error: error.message,
+        stack: error.stack
+      });
       console.error('[Socket] Error joining room:', error);
       callback({ error: 'JOIN_FAILED' });
     }
@@ -401,6 +497,11 @@ class SocketManager {
       // Join socket to room
       socket.join(roomId);
 
+      // Emit current voice call participants directly to the joining socket
+      socket.emit(SOCKET_EVENTS.VOICE_CALL_USERS, {
+        participants: this.getVoiceParticipantList(roomId)
+      });
+
       const messages = messageManager.getActiveMessages(roomId);
       const participantsAfter = roomManager.getRoomUsers(roomId);
 
@@ -417,6 +518,7 @@ class SocketManager {
         totalUsers: joinResult.totalUsers,
         messages,
         participants: participantsAfter,
+        voiceParticipants: this.getVoiceParticipantList(roomId),
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
@@ -454,14 +556,20 @@ class SocketManager {
     }
   }
 
+
   /**
    * Handle message sending
    */
   handleMessageSend(io, socket, data) {
     try {
-      const { roomId, content } = data;
+      const { roomId, content, type, mediaUrl, duration } = data;
+      const isVoice = type === 'voice';
 
-      if (!roomId || !content || content.trim() === '') {
+      if (!roomId) return;
+      if (!isVoice && (!content || content.trim() === '')) {
+        return;
+      }
+      if (isVoice && (!mediaUrl || mediaUrl.trim() === '')) {
         return;
       }
 
@@ -497,9 +605,14 @@ class SocketManager {
       const isHost = senderUserId === room.hostUserId;
 
       // Sanitize and limit message content
-      const sanitizedContent = sanitizeContent(content, 2000);
-      if (!sanitizedContent || sanitizedContent.trim() === '') {
-        return;
+      let sanitizedContent = '';
+      if (!isVoice) {
+        sanitizedContent = sanitizeContent(content, 2000);
+        if (!sanitizedContent || sanitizedContent.trim() === '') {
+          return;
+        }
+      } else {
+        sanitizedContent = '[Voice Message]';
       }
 
       // Create message
@@ -509,10 +622,13 @@ class SocketManager {
         senderDisplayName,
         sanitizedContent,
         room.autoDeleteMs,
-        isHost
+        isHost,
+        type || 'text',
+        mediaUrl || null,
+        duration || null
       );
 
-      console.log(`[Socket] Message in room ${roomId}: ${message.messageId}`);
+      console.log(`[Socket] Message in room ${roomId}: ${message.messageId} (Type: ${message.type})`);
 
       // Broadcast message to room
       io.to(roomId).emit(SOCKET_EVENTS.MESSAGE_RECEIVED, {
@@ -521,6 +637,9 @@ class SocketManager {
         senderId: message.senderId,
         senderDisplayName: message.senderDisplayName,
         content: message.content,
+        type: message.type,
+        mediaUrl: message.mediaUrl,
+        duration: message.duration,
         createdAt: message.createdAt,
         expiresAt: message.expiresAt,
         isHost: message.isHost
@@ -648,6 +767,8 @@ class SocketManager {
       const removedUser = roomManager.removeUserFromRoom(roomId, targetSocketId);
 
       if (removedUser) {
+        this.removeVoiceParticipant(io, roomId, removedUser.roomUserId);
+
         // Disconnect/leave room for the kicked socket
         io.to(targetSocketId).emit(SOCKET_EVENTS.KICKED_FROM_ROOM, { roomId });
         io.in(targetSocketId).socketsLeave(roomId);
@@ -719,6 +840,7 @@ class SocketManager {
 
       const user = roomManager.removeUserFromRoom(roomId, socket.id);
       if (user) {
+        this.removeVoiceParticipant(io, roomId, user.roomUserId);
         socket.leave(roomId);
 
         console.log(
@@ -791,6 +913,11 @@ class SocketManager {
       // Re-join socket to room namespace
       socket.join(roomId);
 
+      // Emit current voice call participants directly to the reconnecting socket
+      socket.emit(SOCKET_EVENTS.VOICE_CALL_USERS, {
+        participants: this.getVoiceParticipantList(roomId)
+      });
+
       // Get current room state
       const messages = messageManager.getActiveMessages(roomId);
       const participantsAfter = roomManager.getRoomUsers(roomId);
@@ -807,6 +934,7 @@ class SocketManager {
         totalUsers: joinResult.totalUsers,
         messages,
         participants: participantsAfter,
+        voiceParticipants: this.getVoiceParticipantList(roomId),
         settings: {
           roomLifespanMinutes: room.settings.roomLifespanMinutes,
           autoDeleteMinutes: room.settings.autoDeleteMinutes,
@@ -840,6 +968,7 @@ class SocketManager {
 
       if (socketInfo) {
         const { roomId, userId: roomUserId } = socketInfo;
+        this.removeVoiceParticipant(io, roomId, roomUserId);
 
         console.log(`[Socket] User ${roomUserId} disconnected temporarily from room ${roomId}. Starting grace period.`);
 
@@ -868,6 +997,197 @@ class SocketManager {
       console.log(`[Socket] User socket disconnected: ${socket.id}`);
     } catch (error) {
       console.error('[Socket] Error handling disconnect:', error);
+    }
+  }
+
+  /**
+   * Handle WebRTC Offer signaling relay
+   */
+  handleWebRTCOffer(io, socket, data) {
+    try {
+      const { targetRoomUserId, offer, context } = data;
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo) return;
+      const { roomId, userId: senderRoomUserId } = socketInfo;
+
+      const roomUsers = roomManager.getUsersInRoom(roomId);
+      const targetUser = roomUsers.find(u => u.roomUserId === targetRoomUserId);
+      if (targetUser) {
+        io.to(targetUser.socketId).emit(SOCKET_EVENTS.WEBRTC_OFFER, {
+          senderRoomUserId,
+          offer,
+          context
+        });
+      }
+    } catch (error) {
+      console.error('[Socket] Error in webrtc-offer:', error);
+    }
+  }
+
+  /**
+   * Handle WebRTC Answer signaling relay
+   */
+  handleWebRTCAnswer(io, socket, data) {
+    try {
+      const { targetRoomUserId, answer, context } = data;
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo) return;
+      const { roomId, userId: senderRoomUserId } = socketInfo;
+
+      const roomUsers = roomManager.getUsersInRoom(roomId);
+      const targetUser = roomUsers.find(u => u.roomUserId === targetRoomUserId);
+      if (targetUser) {
+        io.to(targetUser.socketId).emit(SOCKET_EVENTS.WEBRTC_ANSWER, {
+          senderRoomUserId,
+          answer,
+          context
+        });
+      }
+    } catch (error) {
+      console.error('[Socket] Error in webrtc-answer:', error);
+    }
+  }
+
+  /**
+   * Handle WebRTC ICE Candidate signaling relay
+   */
+  handleWebRTCIceCandidate(io, socket, data) {
+    try {
+      const { targetRoomUserId, candidate, context } = data;
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo) return;
+      const { roomId, userId: senderRoomUserId } = socketInfo;
+
+      const roomUsers = roomManager.getUsersInRoom(roomId);
+      const targetUser = roomUsers.find(u => u.roomUserId === targetRoomUserId);
+      if (targetUser) {
+        io.to(targetUser.socketId).emit(SOCKET_EVENTS.WEBRTC_ICE_CANDIDATE, {
+          senderRoomUserId,
+          candidate,
+          context
+        });
+      }
+    } catch (error) {
+      console.error('[Socket] Error in webrtc-ice-candidate:', error);
+    }
+  }
+
+  /**
+   * Handle WebRTC Init signal broadcast
+   */
+  handleWebRTCInit(io, socket, data = {}) {
+    try {
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo) return;
+      const { roomId, userId: roomUserId } = socketInfo;
+      const { context } = data || {};
+
+      console.log(`[Socket] WebRTC Init from ${roomUserId} in room ${roomId}`);
+      // Broadcast to other sockets in the room
+      socket.to(roomId).emit(SOCKET_EVENTS.WEBRTC_INIT, {
+        roomUserId,
+        context
+      });
+    } catch (error) {
+      console.error('[Socket] Error in webrtc-init:', error);
+    }
+  }
+
+  getVoiceRoom(roomId) {
+    if (!this.voiceParticipants.has(roomId)) {
+      this.voiceParticipants.set(roomId, new Map());
+    }
+    return this.voiceParticipants.get(roomId);
+  }
+
+  getVoiceParticipantList(roomId) {
+    return Array.from(this.getVoiceRoom(roomId).values());
+  }
+
+  removeVoiceParticipant(io, roomId, roomUserId) {
+    const voiceRoom = this.voiceParticipants.get(roomId);
+    if (!voiceRoom || !voiceRoom.has(roomUserId)) return;
+
+    const participant = voiceRoom.get(roomUserId);
+    voiceRoom.delete(roomUserId);
+
+    const participants = Array.from(voiceRoom.values());
+
+    io.to(roomId).emit(SOCKET_EVENTS.VOICE_CALL_USER_LEFT, {
+      roomUserId,
+      displayName: participant.displayName,
+      participants
+    });
+
+    if (voiceRoom.size === 0) {
+      this.voiceParticipants.delete(roomId);
+    }
+  }
+
+  handleVoiceCallJoin(io, socket, data = {}, callback) {
+    try {
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo) {
+        if (callback) callback({ error: 'UNAUTHORIZED_MEMBER' });
+        return;
+      }
+
+      const { roomId, userId: roomUserId, displayName } = socketInfo;
+      const room = roomManager.getRoom(roomId);
+      if (!room || !roomManager.isRoomActive(roomId)) {
+        if (callback) callback({ error: 'ROOM_NOT_FOUND' });
+        return;
+      }
+
+      const voiceRoom = this.getVoiceRoom(roomId);
+      const existing = voiceRoom.get(roomUserId);
+      if (!existing && voiceRoom.size >= MAX_VOICE_PARTICIPANTS) {
+        if (callback) callback({ error: 'VOICE_CALL_FULL', maxParticipants: MAX_VOICE_PARTICIPANTS });
+        return;
+      }
+
+      const participant = {
+        roomUserId,
+        displayName,
+        isMuted: !!data.isMuted,
+        isListenerOnly: !!data.isListenerOnly
+      };
+
+      voiceRoom.set(roomUserId, participant);
+
+      const participants = this.getVoiceParticipantList(roomId);
+      if (callback) {
+        callback({
+          success: true,
+          participant,
+          participants,
+          maxParticipants: MAX_VOICE_PARTICIPANTS
+        });
+      }
+
+      if (!existing) {
+        socket.to(roomId).emit(SOCKET_EVENTS.VOICE_CALL_USER_JOINED, {
+          participant,
+          participants
+        });
+      } else {
+        io.to(roomId).emit(SOCKET_EVENTS.VOICE_CALL_USERS, {
+          participants
+        });
+      }
+    } catch (error) {
+      console.error('[Socket] Error joining voice call:', error);
+      if (callback) callback({ error: 'VOICE_JOIN_FAILED' });
+    }
+  }
+
+  handleVoiceCallLeave(io, socket) {
+    try {
+      const socketInfo = roomManager.getSocketInfo(socket.id);
+      if (!socketInfo) return;
+      this.removeVoiceParticipant(io, socketInfo.roomId, socketInfo.userId);
+    } catch (error) {
+      console.error('[Socket] Error leaving voice call:', error);
     }
   }
 }

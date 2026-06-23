@@ -1,4 +1,5 @@
 import { generateId, getCurrentTimestamp } from '../utils/helpers.js';
+import { deleteVoiceFile } from '../utils/voiceCleanup.js';
 
 class MessageManager {
   constructor() {
@@ -6,9 +7,27 @@ class MessageManager {
     this.messages = new Map();
   }
 
-  createMessage(roomId, senderId, senderDisplayName, content, expiresAtMs, isHost = false) {
+  createMessage(
+    roomId,
+    senderId,
+    senderDisplayName,
+    content,
+    expiresAtMs,
+    isHost = false,
+    type = 'text',
+    mediaUrl = null,
+    duration = null
+  ) {
     const messageId = generateId('MSG');
     const createdAt = getCurrentTimestamp();
+
+    // Determine type-specific expiry duration
+    let msgExpiryMs;
+    if (type === 'voice') {
+      msgExpiryMs = 300 * 1000; // 5 minutes for voice messages
+    } else {
+      msgExpiryMs = expiresAtMs || (60 * 1000); // Respect room settings or default to 60s for text
+    }
 
     const message = {
       messageId,
@@ -16,8 +35,11 @@ class MessageManager {
       senderId,
       senderDisplayName,
       content,
+      type,
+      mediaUrl,
+      duration,
       createdAt,
-      expiresAt: createdAt + expiresAtMs,
+      expiresAt: createdAt + msgExpiryMs,
       isHost
     };
 
@@ -56,6 +78,10 @@ class MessageManager {
     const index = roomMessages.findIndex(m => m.messageId === messageId);
 
     if (index !== -1) {
+      const msg = roomMessages[index];
+      if (msg.type === 'voice') {
+        deleteVoiceFile(roomId, messageId);
+      }
       roomMessages.splice(index, 1);
       return true;
     }
@@ -79,6 +105,10 @@ class MessageManager {
         activeMessages.push(msg);
       } else {
         expiredMessages.push(msg);
+        // Automatically delete associated voice file if it expires
+        if (msg.type === 'voice') {
+          deleteVoiceFile(roomId, msg.messageId);
+        }
       }
     });
 

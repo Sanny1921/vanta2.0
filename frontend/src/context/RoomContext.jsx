@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import socketService from '../services/socketService';
 
 const RoomContext = createContext();
+const DIAG_PREFIX = '[Diag][RoomContext]';
 
 const deduplicateParticipants = (list) => {
   const seen = new Set();
@@ -87,9 +88,12 @@ export const RoomProvider = ({ children }) => {
 
   // Room lifecycle
   const createRoom = useCallback((data) => {
+    console.log(`${DIAG_PREFIX} createRoom start`, data);
     return new Promise((resolve, reject) => {
       socketService.createRoom(data, (response) => {
+        console.log(`${DIAG_PREFIX} createRoom response`, response);
         if (response.error) {
+          console.error(`${DIAG_PREFIX} createRoom failure`, response.error);
           setError(response.error);
           reject(response.error);
         } else {
@@ -111,6 +115,11 @@ export const RoomProvider = ({ children }) => {
           sessionStorage.setItem('vanta_display_name', data.hostDisplayName);
           sessionStorage.setItem('vanta_host_access_token', response.hostAccessToken);
 
+          console.log(`${DIAG_PREFIX} createRoom success`, {
+            roomId: response.roomId,
+            roomUserId: response.roomUserId,
+            settings: response.settings
+          });
           resolve(response);
         }
       });
@@ -118,12 +127,18 @@ export const RoomProvider = ({ children }) => {
   }, []);
 
   const joinRoom = useCallback((data) => {
+    console.log(`${DIAG_PREFIX} joinRoom start`, data);
     return new Promise((resolve, reject) => {
       socketService.joinRoom(data, (response) => {
+        console.log(`${DIAG_PREFIX} joinRoom response`, response);
         if (response.error) {
+          console.error(`${DIAG_PREFIX} joinRoom failure`, response.error);
           setError(response.error);
           reject(response.error);
         } else if (response.requiresPassword) {
+          console.log(`${DIAG_PREFIX} joinRoom password required`, {
+            roomId: data.roomId
+          });
           resolve({ requiresPassword: true });
         } else {
           setCurrentRoom(response.roomId);
@@ -150,6 +165,11 @@ export const RoomProvider = ({ children }) => {
             sessionStorage.setItem('vanta_host_access_token', data.hostAccessToken);
           }
 
+          console.log(`${DIAG_PREFIX} joinRoom success`, {
+            roomId: response.roomId,
+            roomUserId: response.roomUserId,
+            totalUsers: uniqueParticipants.length
+          });
           resolve(response);
         }
       });

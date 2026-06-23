@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useUI } from '../context/UIContext';
 import { getAppUrl } from '../config/constants';
+import VoicePlayer from './VoicePlayer';
 import '../css/ChatArea.css';
 
 export default function ChatArea({
@@ -11,7 +12,7 @@ export default function ChatArea({
   roomId
 }) {
   const { showToast } = useUI();
-  const hasUserMessages = messages.some(msg => msg.type === 'user');
+  const hasUserMessages = messages.some(msg => msg.type === 'user' || msg.type === 'voice');
 
   const handleCopyLink = () => {
     const appUrl = getAppUrl();
@@ -123,7 +124,16 @@ export default function ChatArea({
                   </span>
                 </div>
                 <div className="message-text-content">
-                  {msg.content}
+                  {msg.type === 'voice' ? (
+                    <VoicePlayer
+                      src={msg.mediaUrl}
+                      duration={msg.duration}
+                      messageId={msg.messageId}
+                      roomId={roomId}
+                    />
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             </div>

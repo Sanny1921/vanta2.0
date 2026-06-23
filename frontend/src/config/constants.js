@@ -44,7 +44,20 @@ export const SOCKET_EVENTS = {
   KICKED_FROM_ROOM: 'kicked-from-room',
 
   // Reconnection
-  RECONNECT_ROOM: 'reconnect-room'
+  RECONNECT_ROOM: 'reconnect-room',
+
+  // WebRTC Signaling
+  WEBRTC_OFFER: 'webrtc-offer',
+  WEBRTC_ANSWER: 'webrtc-answer',
+  WEBRTC_ICE_CANDIDATE: 'webrtc-ice-candidate',
+  WEBRTC_INIT: 'webrtc-init',
+
+  // Voice call roster
+  VOICE_CALL_JOIN: 'voice-call-join',
+  VOICE_CALL_LEAVE: 'voice-call-leave',
+  VOICE_CALL_USERS: 'voice-call-users',
+  VOICE_CALL_USER_JOINED: 'voice-call-user-joined',
+  VOICE_CALL_USER_LEFT: 'voice-call-user-left'
 };
 
 /**

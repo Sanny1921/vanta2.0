@@ -6,6 +6,8 @@ import socketService from '../services/socketService';
 import { getAppUrl } from '../config/constants';
 import '../css/Home.css';
 
+const DIAG_PREFIX = '[Diag][Home]';
+
 function LiveConversationDemo() {
   const [step, setStep] = useState(0);
   const messagesContainerRef = useRef(null);
@@ -234,6 +236,15 @@ export default function Home() {
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
+    console.log(`${DIAG_PREFIX} Create button click`, {
+      form: {
+        ...createForm,
+        password: createForm.password ? '[present]' : null
+      },
+      tokenRequired,
+      socketConnected: socketService.socket?.connected || false,
+      socketId: socketService.socket?.id || null
+    });
     setLoading(true);
     setError(null);
 
@@ -245,12 +256,14 @@ export default function Home() {
     }
 
     try {
+      console.log(`${DIAG_PREFIX} Create request start`);
       const response = await createRoom({
         hostDisplayName: createForm.hostDisplayName,
         token: createForm.token || null,
         memberLimit: parseInt(createForm.memberLimit) || 5,
         password: createForm.password || null
       });
+      console.log(`${DIAG_PREFIX} Create request success`, response);
 
       // Close create modal and show details screen
       setIsCreateModalOpen(false);
@@ -266,6 +279,7 @@ export default function Home() {
       });
       showToast('Room created successfully!', 'success');
     } catch (err) {
+      console.error(`${DIAG_PREFIX} Create request failure`, err);
       console.error('Failed to create room:', err);
       showToast(typeof err === 'string' ? err : 'Failed to create room', 'error');
     } finally {
@@ -275,14 +289,21 @@ export default function Home() {
 
   const handleJoinSubmit = async (e) => {
     e.preventDefault();
+    console.log(`${DIAG_PREFIX} Join button click`, {
+      form: joinForm,
+      socketConnected: socketService.socket?.connected || false,
+      socketId: socketService.socket?.id || null
+    });
     setLoading(true);
     setError(null);
 
     try {
+      console.log(`${DIAG_PREFIX} Join request start`);
       const response = await joinRoom({
         roomId: joinForm.roomId.toUpperCase(),
         displayName: joinForm.displayName
       });
+      console.log(`${DIAG_PREFIX} Join request success`, response);
 
       // Close modal on successful transition
       setIsJoinModalOpen(false);
@@ -297,6 +318,7 @@ export default function Home() {
         navigate(`/room/${joinForm.roomId.toUpperCase()}`);
       }
     } catch (err) {
+      console.error(`${DIAG_PREFIX} Join request failure`, err);
       console.error('Failed to join room:', err);
       let errMsg = 'Failed to join room';
       if (err === 'ROOM_NOT_FOUND') errMsg = 'Invalid room code';
