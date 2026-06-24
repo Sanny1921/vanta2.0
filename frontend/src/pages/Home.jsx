@@ -530,12 +530,7 @@ export default function Home() {
       <header id="home" className="hero-section">
         <div className="hero-container-inner">
           <div className="hero-left">
-            <h1 className="hero-title">
-              Create.<br />
-              Share.<br />
-              Talk.<br />
-              Disappear.
-            </h1>
+            <h1 className="hero-title">Create.<br />Share.<br />Talk.<br />Disappear.</h1>
             <p className="hero-description">
               Built for conversations, not archives.
             </p>
