@@ -1340,8 +1340,31 @@
   .navbar-links {
     display: none;
   }
+  .hero-section {
+    padding: 100px 20px 40px 20px;
+  }
+  .hero-container-inner {
+    gap: 30px;
+  }
   .hero-title {
-    font-size: 52px;
+    font-size: 38px;
+    margin-bottom: 12px;
+  }
+  .hero-description {
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+  .hero-buttons {
+    margin-bottom: 24px;
+    gap: 12px;
+  }
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    padding: 12px 22px;
+    font-size: 14.5px;
+  }
+  .hero-supporting-text {
+    margin-top: 12px;
   }
   .feature-grid-new {
     grid-template-columns: 1fr;
@@ -1366,6 +1389,27 @@
   }
   .section-title-new {
     font-size: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 90px 16px 30px 16px;
+  }
+  .hero-title {
+    font-size: 32px;
+  }
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
   }
 }
 
