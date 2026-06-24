@@ -28,7 +28,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 60px;
-  z-index: 100;
+  z-index: 1000;
   transition: all 0.25s ease;
 }
 
@@ -305,6 +305,8 @@
 }
 
 .chat-preview-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 440px;
   background: var(--vanta-surface);
@@ -887,7 +889,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 9900;
   padding: 20px;
   animation: modalFadeIn 0.25s ease-out;
 }
