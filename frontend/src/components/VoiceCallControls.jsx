@@ -31,7 +31,6 @@ export default function VoiceCallControls({
   participants,
   participantCount,
   maxParticipants,
-  remoteStreams,
   onJoinCall,
   onLeaveCall,
   onToggleMute,
@@ -135,20 +134,6 @@ export default function VoiceCallControls({
         </div>
       )}
 
-      {/* Hidden audio elements for remote streams */}
-      <div className="voice-call-audio" aria-hidden="true">
-        {remoteStreams.map(({ roomUserId, stream }) => (
-          <audio
-            key={roomUserId}
-            ref={(node) => {
-              if (node && node.srcObject !== stream) {
-                node.srcObject = stream;
-              }
-            }}
-            autoPlay
-          />
-        ))}
-      </div>
     </div>
   );
 }
@@ -166,10 +151,6 @@ VoiceCallControls.propTypes = {
   })),
   participantCount: PropTypes.number.isRequired,
   maxParticipants: PropTypes.number.isRequired,
-  remoteStreams: PropTypes.arrayOf(PropTypes.shape({
-    roomUserId: PropTypes.string.isRequired,
-    stream: PropTypes.object.isRequired
-  })).isRequired,
   onJoinCall: PropTypes.func.isRequired,
   onLeaveCall: PropTypes.func.isRequired,
   onToggleMute: PropTypes.func.isRequired,

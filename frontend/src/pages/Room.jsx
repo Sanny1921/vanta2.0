@@ -151,7 +151,20 @@ export default function Room() {
     setIsVoiceMuted(nextMuted);
     webRTCService.setVoiceMuted(nextMuted);
     sessionStorage.setItem('vanta_voice_muted', String(nextMuted));
+    socketService.joinVoiceCall({
+      isListenerOnly,
+      isMuted: nextMuted
+    });
   }, [isInVoiceCall, isListenerOnly, isVoiceMuted]);
+
+  const toggleListenerOnly = useCallback(() => {
+    if (isInVoiceCall) return;
+    setIsListenerOnly(prev => {
+      const next = !prev;
+      sessionStorage.setItem('vanta_voice_listener_only', String(next));
+      return next;
+    });
+  }, [isInVoiceCall]);
 
   // Setup socket listeners
   useEffect(() => {
@@ -632,11 +645,10 @@ export default function Room() {
           isListenerOnly={isListenerOnly}
           voiceParticipants={voiceParticipants}
           maxVoiceParticipants={MAX_VOICE_PARTICIPANTS}
-          remoteVoiceStreams={remoteVoiceStreams}
           onJoinCall={() => joinVoiceCall()}
           onLeaveCall={() => leaveVoiceCall()}
           onToggleMute={toggleVoiceMute}
-          onToggleListenerOnly={() => setIsListenerOnly(prev => !prev)}
+          onToggleListenerOnly={toggleListenerOnly}
         />
 
         <ChatArea
@@ -674,6 +686,7 @@ export default function Room() {
         {activeModal === 'participants' && (
           <ParticipantList
             participants={participants}
+            voiceParticipants={voiceParticipants}
             maxUsers={roomSettings?.maxUsers}
             onClose={() => setActiveModal(null)}
           />
@@ -695,6 +708,21 @@ export default function Room() {
             onClose={() => setActiveModal(null)}
           />
         )}
+      </div>
+
+      {/* Hidden audio elements for remote voice call streams */}
+      <div className="voice-call-audio" aria-hidden="true" style={{ display: 'none' }}>
+        {remoteVoiceStreams.map(({ roomUserId, stream }) => (
+          <audio
+            key={roomUserId}
+            ref={(node) => {
+              if (node && node.srcObject !== stream) {
+                node.srcObject = stream;
+              }
+            }}
+            autoPlay
+          />
+        ))}
       </div>
     </div>
   );

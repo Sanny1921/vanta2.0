@@ -17,7 +17,7 @@
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 2px;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   text-transform: uppercase;
 }
 
@@ -126,7 +126,7 @@
 
 .btn-menu-trigger:hover {
   background-color: var(--vanta-input);
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 /* ─── Minimalist Dropdown ─────────────────────────────────────────────────── */
@@ -137,7 +137,7 @@
   background-color: var(--vanta-card);
   border: 1px solid var(--vanta-border);
   border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--vanta-shadow-lg);
   z-index: 1000;
   min-width: 260px;
   padding: 8px;
@@ -193,7 +193,7 @@
 
 .dropdown-item:hover {
   background-color: var(--vanta-input);
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .item-icon {
@@ -211,7 +211,7 @@
 
 .item-value {
   font-family: monospace;
-  background-color: rgba(139, 92, 246, 0.15);
+  background-color: rgba(var(--vanta-accent-rgb), 0.15);
   color: var(--vanta-accent);
   padding: 2px 8px;
   border-radius: 4px;
@@ -227,7 +227,7 @@
 
 .dropdown-item.danger:hover {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #ff8787;
+  color: var(--vanta-danger);
 }
 
 /* Leave button */
@@ -236,8 +236,8 @@
 }
 
 .dropdown-item.leave-btn:hover {
-  background-color: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
+  background-color: var(--vanta-input);
+  color: var(--vanta-text-primary);
 }
 
 .item-icon-svg {
@@ -248,7 +248,7 @@
 }
 
 .dropdown-item:hover .item-icon-svg {
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .dropdown-item.danger .item-icon-svg {
@@ -256,7 +256,7 @@
 }
 
 .dropdown-item.danger:hover .item-icon-svg {
-  color: #ff8787;
+  color: var(--vanta-danger);
 }
 
 /* ─── Mobile ──────────────────────────────────────────────────────────────── */
@@ -274,4 +274,24 @@
   .voice-call-panel {
     right: 0;
   }
+}
+
+@media (max-width: 480px) {
+  .vanta-dropdown,
+  .voice-call-panel {
+    right: -16px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* ─── Light Mode Specific Overrides ───────────────────────────────────────── */
+[data-theme="light"] .vanta-dropdown {
+  background-color: #ffffff;
+  border-color: rgba(var(--vanta-accent-rgb), 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .dropdown-item:hover {
+  background-color: rgba(var(--vanta-accent-rgb), 0.06);
+  color: var(--vanta-accent);
 }

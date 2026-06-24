@@ -16,14 +16,14 @@
   gap: 12px;
   padding: 14px 20px;
   border-radius: 8px;
-  background: rgba(18, 18, 18, 0.85);
+  background: var(--vanta-surface);
   border: 1px solid var(--vanta-border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: var(--vanta-text-primary);
   font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--vanta-shadow-lg);
   animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   pointer-events: auto;
   min-width: 280px;
@@ -160,7 +160,7 @@
 }
 
 .btn-modal-cancel {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--vanta-input);
   color: var(--vanta-text-primary);
   border: 1px solid var(--vanta-border);
   padding: 10px 18px;
@@ -172,7 +172,7 @@
 }
 
 .btn-modal-cancel:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--vanta-card);
   border-color: var(--vanta-text-muted);
 }
 
@@ -218,4 +218,31 @@
 
 .btn-modal-close-alert:hover {
   background: var(--vanta-accent-hover);
+}
+
+@media (max-width: 480px) {
+  .vanta-custom-modal-card {
+    padding: 20px 16px;
+  }
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .btn-modal-cancel,
+  .btn-modal-confirm {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .vanta-toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+  }
+  .vanta-toast {
+    min-width: unset;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 }

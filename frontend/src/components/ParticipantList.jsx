@@ -3,6 +3,7 @@ import '../css/ParticipantList.css';
 
 export default function ParticipantList({
   participants,
+  voiceParticipants,
   maxUsers,
   onClose
 }) {
@@ -19,15 +20,24 @@ export default function ParticipantList({
 
         <div className="participant-list-content">
           <ul className="participant-list">
-            {participants.map((user) => (
-              <li key={user.roomUserId} className="participant-item">
-                <span className="status-dot online"></span>
-                <span className="participant-name">
-                  {user.displayName}
-                  {user.isHost && <span className="host-badge">(Host)</span>}
-                </span>
-              </li>
-            ))}
+            {participants.map((user) => {
+              const voiceUser = voiceParticipants?.find(vp => vp.roomUserId === user.roomUserId);
+              return (
+                <li key={user.roomUserId} className="participant-item">
+                  <span className="status-dot online"></span>
+                  <span className="participant-name">
+                    {user.displayName}
+                    {user.isHost && <span className="host-badge">(Host)</span>}
+                    {voiceUser && voiceUser.isListenerOnly && (
+                      <span className="voice-status-icon" title="Listener Mode">🎧</span>
+                    )}
+                    {voiceUser && voiceUser.isMuted && !voiceUser.isListenerOnly && (
+                      <span className="voice-status-icon" title="Muted">🔇</span>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
 
             {Array.from({ length: waitingCount }).map((_, idx) => (
               <li key={`waiting-${idx}`} className="participant-item waiting">
@@ -46,6 +56,7 @@ export default function ParticipantList({
 
 ParticipantList.propTypes = {
   participants: PropTypes.arrayOf(PropTypes.object).isRequired,
+  voiceParticipants: PropTypes.arrayOf(PropTypes.object),
   maxUsers: PropTypes.number,
   onClose: PropTypes.func.isRequired
 };

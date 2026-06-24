@@ -1,0 +1,154 @@
+/* Theme Switcher Wrapper */
+.vanta-theme-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+/* Toggle Trigger Button */
+.switcher-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--vanta-input);
+  border: 1px solid var(--vanta-border);
+  color: var(--vanta-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.switcher-toggle-btn:hover {
+  color: var(--vanta-accent);
+  border-color: var(--vanta-accent);
+  background-color: rgba(var(--vanta-accent-rgb), 0.08);
+  transform: translateY(-1px);
+}
+
+.switcher-toggle-btn.active {
+  color: var(--vanta-accent);
+  border-color: var(--vanta-accent);
+  background-color: rgba(var(--vanta-accent-rgb), 0.12);
+}
+
+/* Dropdown Panel */
+.switcher-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background-color: var(--vanta-surface);
+  border: 1px solid var(--vanta-border);
+  border-radius: 12px;
+  box-shadow: var(--vanta-shadow-lg);
+  padding: 16px;
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sections */
+.switcher-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.switcher-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--vanta-text-secondary);
+  text-transform: uppercase;
+}
+
+/* Segmented Control for Mode Select */
+.segmented-control {
+  display: flex;
+  background-color: var(--vanta-input);
+  border: 1px solid var(--vanta-border);
+  border-radius: 8px;
+  padding: 3px;
+  width: 100%;
+}
+
+.segment-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--vanta-text-secondary);
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segment-btn:hover:not(.active) {
+  color: var(--vanta-text-primary);
+}
+
+.segment-btn.active {
+  background-color: var(--vanta-accent);
+  color: #ffffff;
+  box-shadow: var(--vanta-shadow);
+}
+
+/* Accent Picker Row */
+.accent-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.accent-dot-btn {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-sizing: border-box;
+}
+
+.accent-dot-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--vanta-bg), 0 0 0 3px var(--vanta-accent);
+}
+
+.accent-dot-btn.active {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 2px var(--vanta-bg), 0 0 0 4px var(--vanta-accent);
+}
+
+.accent-dot-btn svg {
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .switcher-dropdown-panel {
+    right: -10px;
+    max-width: calc(100vw - 32px);
+  }
+}

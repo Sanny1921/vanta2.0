@@ -4,6 +4,7 @@ import { useRoom } from '../context/RoomContext';
 import { useUI } from '../context/UIContext';
 import socketService from '../services/socketService';
 import { getAppUrl } from '../config/constants';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import '../css/Home.css';
 
 const DIAG_PREFIX = '[Diag][Home]';
@@ -610,6 +611,7 @@ export default function Home() {
 
         {/* Desktop actions */}
         <div className="navbar-actions desktop-only">
+          <ThemeSwitcher />
           <button className="btn-navbar-secondary" onClick={() => setIsJoinModalOpen(true)}>
             Join Room
           </button>
@@ -644,6 +646,10 @@ export default function Home() {
             </div>
             <div className="dropdown-divider"></div>
             <div className="dropdown-actions">
+              <div className="mobile-theme-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', padding: '0 4px' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--vanta-text-secondary)', letterSpacing: '0.5px' }}>THEME</span>
+                <ThemeSwitcher />
+              </div>
               <button
                 className="btn-dropdown-secondary"
                 onClick={() => {

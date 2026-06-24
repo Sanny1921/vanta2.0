@@ -17,8 +17,8 @@
 }
 
 .voice-player-container.playing {
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+  border-color: rgba(var(--vanta-accent-rgb), 0.4);
+  box-shadow: 0 0 15px rgba(var(--vanta-accent-rgb), 0.15);
 }
 
 .voice-player-container.loading,
@@ -63,7 +63,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 10px rgba(var(--vanta-accent-rgb), 0.3);
   padding: 0;
 }
 
@@ -101,7 +101,7 @@
   height: 10px;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+  box-shadow: 0 0 8px rgba(var(--vanta-accent-rgb), 0.8);
   transition: transform 0.15s ease;
 }
 

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useUI } from '../context/UIContext';
 import { getAppUrl } from '../config/constants';
 import VoiceCallControls from './VoiceCallControls';
+import ThemeSwitcher from './ThemeSwitcher';
 import '../css/RoomHeader.css';
 
 export default function RoomHeader({
@@ -22,7 +23,6 @@ export default function RoomHeader({
   isListenerOnly,
   voiceParticipants,
   maxVoiceParticipants,
-  remoteVoiceStreams,
   onJoinCall,
   onLeaveCall,
   onToggleMute,
@@ -99,7 +99,6 @@ export default function RoomHeader({
                 participants={voiceParticipants}
                 participantCount={voiceParticipantCount}
                 maxParticipants={maxVoiceParticipants}
-                remoteStreams={remoteVoiceStreams}
                 onJoinCall={onJoinCall}
                 onLeaveCall={onLeaveCall}
                 onToggleMute={onToggleMute}
@@ -109,6 +108,8 @@ export default function RoomHeader({
             </div>
           )}
         </div>
+
+        <ThemeSwitcher />
 
         {/* Three-dot Menu */}
         <div className="room-header-right" ref={dropdownRef}>
@@ -236,7 +237,6 @@ RoomHeader.propTypes = {
   isListenerOnly: PropTypes.bool.isRequired,
   voiceParticipants: PropTypes.array.isRequired,
   maxVoiceParticipants: PropTypes.number.isRequired,
-  remoteVoiceStreams: PropTypes.array.isRequired,
   onJoinCall: PropTypes.func.isRequired,
   onLeaveCall: PropTypes.func.isRequired,
   onToggleMute: PropTypes.func.isRequired,

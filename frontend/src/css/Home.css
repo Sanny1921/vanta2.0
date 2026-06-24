@@ -1,31 +1,16 @@
-/* Vanta Theme Colors */
-:root {
-  --vanta-bg: #08070c;
-  --vanta-surface: #12101a;
-  --vanta-card: #171522;
-  --vanta-input: #1b1926;
-  --vanta-border: rgba(139, 92, 246, 0.15);
-  --vanta-text-primary: #f3f4f6;
-  --vanta-text-secondary: #9ca3af;
-  --vanta-text-muted: #6b7280;
-  --vanta-accent: #8b5cf6;
-  --vanta-accent-hover: #7c3aed;
-  --vanta-danger: #ef4444;
-  --vanta-danger-hover: #dc2626;
-}
-
 /* Base Landing Styling */
 .landing-page {
   background-color: var(--vanta-bg);
   background-image: 
-    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 50%), 
-    radial-gradient(circle at 20% 70%, rgba(139, 92, 246, 0.04) 0%, transparent 60%);
+    radial-gradient(circle at 80% 20%, rgba(var(--vanta-accent-rgb), 0.07) 0%, transparent 50%), 
+    radial-gradient(circle at 20% 70%, rgba(var(--vanta-accent-rgb), 0.04) 0%, transparent 60%);
   color: var(--vanta-text-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* NAVBAR */
@@ -35,16 +20,16 @@
   left: 0;
   right: 0;
   height: 75px;
-  background-color: rgba(8, 7, 12, 0.85);
+  background-color: var(--vanta-navbar-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--vanta-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 60px;
   z-index: 100;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .navbar-logo {
@@ -54,12 +39,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .logo-icon {
   color: var(--vanta-accent);
-  text-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+  text-shadow: 0 0 15px rgba(var(--vanta-accent-rgb), 0.6);
 }
 
 .navbar-links {
@@ -76,7 +61,7 @@
 }
 
 .navbar-links a:hover {
-  color: #ffffff;
+  color: var(--vanta-accent);
 }
 
 .navbar-actions {
@@ -95,13 +80,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 4px 12px rgba(var(--vanta-accent-rgb), 0.25);
 }
 
 .btn-navbar-primary:hover {
   background-color: var(--vanta-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 6px 16px rgba(var(--vanta-accent-rgb), 0.35);
 }
 
 .btn-navbar-secondary {
@@ -115,7 +100,7 @@
 }
 
 .btn-navbar-secondary:hover {
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 /* GENERAL SECTION STYLING */
@@ -133,7 +118,7 @@
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #a78bfa;
+  color: var(--vanta-accent);
   text-align: center;
   margin-bottom: 12px;
 }
@@ -149,7 +134,7 @@
   text-align: center;
   margin-top: 0;
   margin-bottom: 16px;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   line-height: 1.2;
 }
 
@@ -167,7 +152,7 @@
 }
 
 .accent-text {
-  background: linear-gradient(to right, #ffffff, #a78bfa, #8b5cf6);
+  background: linear-gradient(to right, var(--vanta-gradient-start), var(--vanta-accent-hover), var(--vanta-accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -200,9 +185,9 @@
 }
 
 .hero-badge {
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  color: #c084fc;
+  background: rgba(var(--vanta-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--vanta-accent-rgb), 0.2);
+  color: var(--vanta-accent);
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 12.5px;
@@ -219,7 +204,7 @@
   letter-spacing: -2px;
   margin-top: 0;
   margin-bottom: 24px;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .hero-description {
@@ -247,7 +232,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 16px rgba(var(--vanta-accent-rgb), 0.3);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -256,13 +241,13 @@
 .btn-hero-primary:hover {
   background-color: var(--vanta-accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 22px rgba(139, 92, 246, 0.45);
+  box-shadow: 0 6px 22px rgba(var(--vanta-accent-rgb), 0.45);
 }
 
 .btn-hero-secondary {
   background-color: transparent;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--vanta-text-primary);
+  border: 1px solid var(--vanta-border);
   padding: 14px 28px;
   border-radius: 8px;
   font-size: 15px;
@@ -275,8 +260,8 @@
 }
 
 .btn-hero-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
+  background-color: var(--vanta-input);
+  border-color: var(--vanta-text-muted);
   transform: translateY(-2px);
 }
 
@@ -322,14 +307,12 @@
 .chat-preview-card {
   width: 100%;
   max-width: 440px;
-  background: rgba(18, 16, 26, 0.55);
+  background: var(--vanta-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(139, 92, 246, 0.18);
+  border: 1px solid var(--vanta-border);
   border-radius: 16px;
-  box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.7),
-    0 0 50px rgba(139, 92, 246, 0.04);
+  box-shadow: var(--vanta-shadow-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -342,15 +325,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid var(--vanta-border);
+  background: var(--vanta-bg);
 }
 
 .preview-title {
   font-weight: 800;
   font-size: 13px;
   letter-spacing: 1.5px;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .preview-options {
@@ -375,7 +358,7 @@
   background: transparent;
 }
 .preview-messages::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--vanta-border);
   border-radius: 10px;
 }
 
@@ -410,7 +393,7 @@
   font-weight: 700;
   font-size: 12px;
   flex-shrink: 0;
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 10px rgba(var(--vanta-accent-rgb), 0.3);
 }
 
 .preview-user-msg .avatar.blue {
@@ -427,7 +410,7 @@
 .preview-user-msg .msg-header {
   font-size: 11px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   display: flex;
   align-items: center;
 }
@@ -442,7 +425,7 @@
 .preview-user-msg .msg-body {
   font-size: 12.5px;
   color: var(--vanta-text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--vanta-input);
   padding: 8px 14px;
   border-radius: 4px 12px 12px 12px;
   max-width: 260px;
@@ -454,8 +437,8 @@
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid var(--vanta-border);
+  background: var(--vanta-surface);
 }
 
 .preview-btn-attachment,
@@ -463,8 +446,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--vanta-input);
+  border: 1px solid var(--vanta-border);
   border-radius: 6px;
   color: var(--vanta-text-secondary);
   font-size: 13px;
@@ -478,8 +461,8 @@
 .composer-input {
   flex: 1;
   min-width: 0;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: var(--vanta-input) !important;
+  border: 1px solid var(--vanta-border) !important;
   border-radius: 6px !important;
   padding: 8px 12px !important;
   color: var(--vanta-text-primary);
@@ -515,8 +498,8 @@
 }
 
 .how-step-card {
-  background: rgba(23, 21, 32, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--vanta-card);
+  border: 1px solid var(--vanta-border);
   border-radius: 12px;
   padding: 28px 24px;
   text-align: left;
@@ -525,17 +508,17 @@
 }
 
 .how-step-card:hover {
-  border-color: rgba(139, 92, 246, 0.2);
-  background: rgba(23, 21, 32, 0.45);
+  border-color: var(--vanta-accent);
+  background: var(--vanta-surface);
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--vanta-shadow);
 }
 
 .how-step-number {
   display: inline-block;
   font-size: 11px;
   font-weight: 700;
-  color: #a78bfa;
+  color: var(--vanta-accent);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: 12px;
@@ -544,7 +527,7 @@
 .how-step-card h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   margin: 0 0 8px 0;
 }
 
@@ -570,7 +553,7 @@
 
 /* SECTION 3 — WHY VANTA IS DIFFERENT */
 .why-vanta-section {
-  background: linear-gradient(180deg, transparent 0%, rgba(139, 92, 246, 0.02) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(var(--vanta-accent-rgb), 0.02) 50%, transparent 100%);
 }
 
 .why-vanta-inner {
@@ -607,13 +590,13 @@
 
 .feature-item-icon {
   font-size: 20px;
-  color: #a78bfa;
+  color: var(--vanta-accent);
   flex-shrink: 0;
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: rgba(139, 92, 246, 0.07);
-  border: 1px solid rgba(139, 92, 246, 0.15);
+  background: rgba(var(--vanta-accent-rgb), 0.07);
+  border: 1px solid var(--vanta-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -629,7 +612,7 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .feature-item-text p {
@@ -643,12 +626,10 @@
 .comparison-table-container {
   width: 100%;
   overflow-x: auto;
-  background: rgba(18, 16, 26, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--vanta-card);
+  border: 1px solid var(--vanta-border);
   border-radius: 16px;
-  box-shadow: 
-    0 20px 45px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(139, 92, 246, 0.02);
+  box-shadow: var(--vanta-shadow);
   margin-top: 50px;
 }
 
@@ -661,14 +642,14 @@
 
 .comparison-table th, .comparison-table td {
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--vanta-border);
   font-size: 14px;
 }
 
 .comparison-table th {
   font-weight: 700;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.01);
+  color: var(--vanta-text-primary);
+  background: var(--vanta-surface);
   letter-spacing: 0.5px;
 }
 
@@ -679,19 +660,19 @@
 }
 
 .comparison-table td.td-feature {
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   font-weight: 500;
 }
 
 .comparison-table .highlighted-col {
-  background: rgba(139, 92, 246, 0.05);
-  color: #ffffff;
+  background: rgba(var(--vanta-accent-rgb), 0.08);
+  color: var(--vanta-text-primary);
   font-weight: bold;
 }
 
 .comparison-table th.highlighted-col {
-  background: rgba(139, 92, 246, 0.12);
-  color: #ffffff;
+  background: rgba(var(--vanta-accent-rgb), 0.16);
+  color: var(--vanta-text-primary);
   font-size: 15px;
   border-bottom: 2px solid var(--vanta-accent);
 }
@@ -718,23 +699,21 @@
 
 /* SECTION 5 — FINAL CTA */
 .final-cta-card {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(18, 16, 26, 0.4) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, rgba(var(--vanta-accent-rgb), 0.12) 0%, var(--vanta-card) 100%);
+  border: 1px solid var(--vanta-border);
   border-radius: 20px;
   padding: 60px 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(139, 92, 246, 0.03);
+  box-shadow: var(--vanta-shadow-lg);
 }
 
 .final-cta-left h2 {
   font-size: 36px;
   font-weight: 800;
   margin: 0 0 10px 0;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   letter-spacing: -0.8px;
 }
 
@@ -751,9 +730,9 @@
 
 /* SECTION 6 — FOOTER */
 .new-vanta-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--vanta-border);
   padding: 80px 60px 40px 60px;
-  background: #050408;
+  background: var(--vanta-surface);
 }
 
 .footer-top-new {
@@ -773,7 +752,7 @@
 .footer-logo {
   font-size: 22px;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   letter-spacing: 0.5px;
 }
 
@@ -799,7 +778,7 @@
 }
 
 .footer-links-new a:hover {
-  color: #ffffff;
+  color: var(--vanta-accent);
 }
 
 .footer-socials {
@@ -815,12 +794,12 @@
 }
 
 .footer-socials a:hover .social-icon {
-  fill: #ffffff;
+  fill: var(--vanta-accent);
 }
 
 .footer-bottom-new {
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--vanta-border);
   padding-top: 30px;
   color: var(--vanta-text-muted);
   font-size: 13px;
@@ -836,22 +815,22 @@
 }
 
 .faq-item {
-  background-color: rgba(23, 21, 32, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background-color: var(--vanta-card);
+  border: 1px solid var(--vanta-border);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.25s ease;
 }
 
 .faq-item:hover {
-  border-color: rgba(139, 92, 246, 0.25);
-  background-color: rgba(23, 21, 32, 0.5);
+  border-color: var(--vanta-accent);
+  background-color: var(--vanta-surface);
 }
 
 .faq-item.active {
-  border-color: rgba(139, 92, 246, 0.35);
-  background-color: rgba(23, 21, 32, 0.6);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border-color: var(--vanta-accent);
+  background-color: var(--vanta-surface);
+  box-shadow: var(--vanta-shadow);
 }
 
 .faq-question {
@@ -862,7 +841,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -883,7 +862,7 @@
 
 .faq-item.active .faq-answer {
   max-height: 1000px;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid var(--vanta-border);
   transition: all 0.25s cubic-bezier(1, 0, 1, 0);
 }
 
@@ -915,12 +894,12 @@
 
 .modal-content {
   background-color: var(--vanta-surface);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(var(--vanta-accent-rgb), 0.25);
   border-radius: 16px;
   position: relative;
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(139, 92, 246, 0.05);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(var(--vanta-accent-rgb), 0.05);
   animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -949,7 +928,7 @@
 }
 
 .btn-modal-close:hover {
-  color: #ffffff;
+  color: var(--vanta-text-primary);
 }
 
 .modal-content .form-container {
@@ -980,7 +959,7 @@
   font-weight: 800;
   letter-spacing: -1.5px;
   color: var(--vanta-text-primary);
-  background: linear-gradient(to right, #ffffff, #a78bfa, #8b5cf6);
+  background: linear-gradient(to right, var(--vanta-gradient-start), var(--vanta-accent-hover), var(--vanta-accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -1008,7 +987,7 @@
 .form-container h2 {
   margin-top: 0;
   margin-bottom: 25px;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   text-align: center;
   font-size: 22px;
   font-weight: 700;
@@ -1032,7 +1011,7 @@
   width: 100%;
   padding: 12px 14px;
   background-color: var(--vanta-input);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--vanta-border);
   border-radius: 8px;
   color: var(--vanta-text-primary);
   font-size: 14px;
@@ -1044,7 +1023,7 @@
 .form-group select:focus {
   outline: none;
   border-color: var(--vanta-accent);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(var(--vanta-accent-rgb), 0.2);
 }
 
 .form-group input::placeholder {
@@ -1195,8 +1174,8 @@
 .btn-copy-small:hover,
 .btn-eye-small:hover {
   background: var(--vanta-card);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--vanta-text-primary);
+  border-color: var(--vanta-accent);
 }
 
 .info-grid {
@@ -1376,11 +1355,15 @@
 }
 
 /* Responsive Utilities */
-.desktop-only {
-  display: block;
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
 }
-.mobile-only {
-  display: none !important;
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
 }
 
 /* Mobile Menu Trigger button styling */
@@ -1388,7 +1371,7 @@
   display: none;
   background: none;
   border: none;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   cursor: pointer;
   padding: 8px;
   z-index: 110;
@@ -1399,7 +1382,7 @@
 }
 
 .mobile-menu-trigger:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--vanta-input);
 }
 
 /* Mobile Floating Dropdown */
@@ -1409,12 +1392,12 @@
   right: 20px;
   margin-top: 8px;
   width: 260px;
-  background: rgba(12, 10, 18, 0.97);
+  background: var(--vanta-surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--vanta-border);
   border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(139, 92, 246, 0.08);
+  box-shadow: var(--vanta-shadow-lg);
   padding: 16px;
   z-index: 105;
   display: flex;
@@ -1456,14 +1439,14 @@
 
 .dropdown-links a:hover,
 .dropdown-links a:active {
-  color: #ffffff;
-  background: rgba(139, 92, 246, 0.08);
+  color: var(--vanta-text-primary);
+  background: var(--vanta-input);
   padding-left: 16px;
 }
 
 .dropdown-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--vanta-border);
   margin: 12px 0;
 }
 
@@ -1485,12 +1468,12 @@
   width: 100%;
   text-align: center;
   transition: all 0.15s ease;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 4px 15px rgba(var(--vanta-accent-rgb), 0.25);
 }
 
 .btn-dropdown-primary:hover {
-  background-color: #7c3aed;
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
+  background-color: var(--vanta-accent-hover);
+  box-shadow: 0 6px 18px rgba(var(--vanta-accent-rgb), 0.35);
 }
 
 .btn-dropdown-primary:active {
@@ -1499,8 +1482,8 @@
 
 .btn-dropdown-secondary {
   background-color: transparent;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--vanta-text-primary);
+  border: 1px solid var(--vanta-border);
   padding: 10px;
   border-radius: 8px;
   font-size: 13.5px;
@@ -1512,12 +1495,12 @@
 }
 
 .btn-dropdown-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--vanta-input);
+  border-color: var(--vanta-text-muted);
 }
 
 .btn-dropdown-secondary:active {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: var(--vanta-border);
 }
 
 /* Mobile Comparison Cards Styling */
@@ -1532,8 +1515,8 @@
 }
 
 .comparison-card {
-  background: rgba(18, 16, 26, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--vanta-card);
+  border: 1px solid var(--vanta-border);
   border-radius: 12px;
   padding: 16px 20px;
   display: flex;
@@ -1557,14 +1540,14 @@
   align-items: center;
   padding: 8px 10px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--vanta-input);
   font-size: 13.5px;
   box-sizing: border-box;
 }
 
 .comparison-card-row.highlighted {
-  background: rgba(139, 92, 246, 0.06);
-  border: 1px solid rgba(139, 92, 246, 0.12);
+  background: rgba(var(--vanta-accent-rgb), 0.08);
+  border: 1px solid var(--vanta-border);
 }
 
 .side-label {
@@ -1585,7 +1568,7 @@
 }
 
 .side-value.vanta-value {
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   font-weight: 600;
 }
 
@@ -1670,32 +1653,36 @@
     font-size: 15px;
   }
   .new-vanta-footer {
-    padding: 48px 24px 32px 24px;
+    padding: 32px 16px 20px 16px;
   }
   .footer-top-new {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+    align-items: start;
+    text-align: left;
   }
   .footer-column {
-    align-items: center;
-    text-align: center;
-    gap: 12px;
-  }
-  .brand-column {
-    margin-bottom: 8px;
-  }
-  .footer-column-title {
-    margin-bottom: 2px;
-  }
-  .footer-column-links {
-    align-items: center;
+    align-items: flex-start;
+    text-align: left;
     gap: 8px;
   }
+  .brand-column {
+    grid-column: span 2;
+    margin-bottom: 4px;
+    text-align: left;
+    align-items: flex-start;
+  }
+  .footer-column-title {
+    margin-bottom: 4px;
+  }
+  .footer-column-links {
+    align-items: flex-start;
+    gap: 6px;
+  }
   .footer-bottom-new {
-    margin-top: 24px;
-    padding-top: 16px;
+    margin-top: 16px;
+    padding-top: 12px;
   }
 }
 
@@ -1737,6 +1724,22 @@
     max-width: 280px;
     justify-content: center;
   }
+  .room-created-success-card {
+    padding: 20px 16px;
+  }
+  .created-btn-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .created-btn-group .btn-primary,
+  .created-btn-group .btn-secondary {
+    width: 100%;
+    flex: none;
+  }
+  .vanta-mobile-dropdown {
+    right: 16px;
+    max-width: calc(100vw - 32px);
+  }
 }
 
 /* REDESIGN EXTRA STYLES */
@@ -1752,8 +1755,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(var(--vanta-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--vanta-accent-rgb), 0.2);
   color: #c084fc;
   padding: 4px 10px;
   border-radius: 12px;
@@ -1851,11 +1854,11 @@
 .comparison-table-wrapper {
   max-width: 800px;
   margin: 0 auto;
-  background: rgba(18, 16, 26, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--vanta-card);
+  border: 1px solid var(--vanta-border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--vanta-shadow);
 }
 
 .vanta-comparison-table {
@@ -1868,7 +1871,7 @@
 .vanta-comparison-table td {
   padding: 18px 28px;
   font-size: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--vanta-border);
 }
 
 .vanta-comparison-table tr:last-child td {
@@ -1881,7 +1884,7 @@
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 1px;
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--vanta-surface);
 }
 
 .vanta-comparison-table td {
@@ -1889,18 +1892,18 @@
 }
 
 .vanta-comparison-table .highlighted-header {
-  color: #a78bfa;
+  color: var(--vanta-accent);
   font-weight: 800;
 }
 
 .vanta-comparison-table .highlighted-cell {
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   font-weight: 600;
 }
 
 /* Subtle row highlighting on hover */
 .vanta-comparison-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--vanta-bg);
 }
 
 .final-cta-buttons {
@@ -1927,7 +1930,7 @@
 
 .room-created-success-card {
   background: var(--vanta-surface);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(var(--vanta-accent-rgb), 0.25);
   border-radius: 16px;
   padding: 24px 32px;
   width: 100%;
@@ -1944,7 +1947,7 @@
 .room-created-success-card h2 {
   font-size: 24px;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   margin: 0;
 }
 
@@ -1956,8 +1959,8 @@
 }
 
 .waiting-participants-badge {
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(var(--vanta-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--vanta-accent-rgb), 0.2);
   color: #c084fc;
   padding: 8px 16px;
   border-radius: 20px;
@@ -1999,7 +2002,7 @@
 .footer-column-title {
   font-size: 14px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--vanta-text-primary);
   margin: 0 0 4px 0;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -2027,7 +2030,7 @@
 }
 
 .footer-column-links a:hover {
-  color: #ffffff;
+  color: var(--vanta-accent);
 }
 
 .footer-description {

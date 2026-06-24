@@ -8,6 +8,19 @@ export const UIProvider = ({ children }) => {
   const [confirmModal, setConfirmModal] = useState(null); // { title, message, confirmLabel, cancelLabel, resolve }
   const [alertModal, setAlertModal] = useState(null); // { title, message, type, resolve }
 
+  const [theme, setTheme] = useState(() => localStorage.getItem('vanta_theme') || 'dark');
+  const [accent, setAccent] = useState(() => localStorage.getItem('vanta_accent') || 'purple');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('vanta_theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-accent', accent);
+    localStorage.setItem('vanta_accent', accent);
+  }, [accent]);
+
   const showToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now() + Math.random().toString(36).substr(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -66,7 +79,7 @@ export const UIProvider = ({ children }) => {
   };
 
   return (
-    <UIContext.Provider value={{ showToast, showConfirm, showAlert }}>
+    <UIContext.Provider value={{ showToast, showConfirm, showAlert, theme, setTheme, accent, setAccent }}>
       {children}
 
       {/* Toast container */}

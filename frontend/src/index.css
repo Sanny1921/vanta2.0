@@ -4,27 +4,154 @@
   font-weight: 400;
 
   color-scheme: dark;
-  
-  --vanta-bg: #0b0b0b;
-  --vanta-surface: #121212;
-  --vanta-card: #171717;
-  --vanta-input: #222222;
-  --vanta-border: #333333;
-  --vanta-text-primary: #e8e8e8;
-  --vanta-text-secondary: #a0a0a0;
-  --vanta-text-muted: #707070;
-  --vanta-accent: #8b5cf6;
-  --vanta-accent-hover: #7c3aed;
+
+  /* Vanta Default Colors (Dark Mode) */
+  --vanta-bg: #08070c;
+  --vanta-surface: #12101a;
+  --vanta-card: #171522;
+  --vanta-input: #1b1926;
+  --vanta-border: rgba(var(--vanta-accent-rgb), 0.15);
+  --vanta-text-primary: #f3f4f6;
+  --vanta-text-secondary: #9ca3af;
+  --vanta-text-muted: #6b7280;
   --vanta-danger: #ef4444;
   --vanta-danger-hover: #dc2626;
 
+  /* Success / Danger Alert Variables */
+  --vanta-success-text: #4ade80;
+  --vanta-success-bg: rgba(34, 197, 94, 0.12);
+  --vanta-success-border: rgba(34, 197, 94, 0.35);
+  --vanta-success-hover-bg: rgba(34, 197, 94, 0.2);
+  --vanta-success-hover-border: rgba(34, 197, 94, 0.5);
+
+  --vanta-danger-text: #fca5a5;
+  --vanta-danger-bg: rgba(239, 68, 68, 0.1);
+  --vanta-danger-border: rgba(239, 68, 68, 0.35);
+  --vanta-danger-hover-bg: rgba(239, 68, 68, 0.18);
+  --vanta-danger-hover-border: rgba(239, 68, 68, 0.5);
+
+  --vanta-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  --vanta-shadow-lg: 0 25px 60px rgba(0, 0, 0, 0.8);
+  --vanta-modal-backdrop: rgba(5, 4, 8, 0.85);
+  --vanta-gradient-start: #ffffff;
+  --vanta-navbar-bg: rgba(8, 7, 12, 0.85);
+
+  /* Default Accent is Purple */
+  --vanta-accent: #8b5cf6;
+  --vanta-accent-hover: #7c3aed;
+  --vanta-accent-rgb: 139, 92, 246;
+
   color: var(--vanta-text-primary);
   background-color: var(--vanta-bg);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Light Theme Variables */
+[data-theme="light"] {
+  color-scheme: light;
+  --vanta-bg: #eff1f5;
+  --vanta-surface: #ffffff;
+  --vanta-card: #ffffff;
+  --vanta-input: #e4e7ec;
+  --vanta-border: rgba(var(--vanta-accent-rgb), 0.18);
+  --vanta-text-primary: #111112;
+  --vanta-text-secondary: #27272a;
+  --vanta-text-muted: #52525b;
+  --vanta-danger: #ff3b30;
+  --vanta-danger-hover: #e0352b;
+
+  /* Success / Danger Alert Variables - Light Mode */
+  --vanta-success-text: #15803d;
+  --vanta-success-bg: rgba(34, 197, 94, 0.08);
+  --vanta-success-border: rgba(34, 197, 94, 0.25);
+  --vanta-success-hover-bg: rgba(34, 197, 94, 0.15);
+  --vanta-success-hover-border: rgba(34, 197, 94, 0.4);
+
+  --vanta-danger-text: #b91c1c;
+  --vanta-danger-bg: rgba(239, 68, 68, 0.06);
+  --vanta-danger-border: rgba(239, 68, 68, 0.25);
+  --vanta-danger-hover-bg: rgba(239, 68, 68, 0.12);
+  --vanta-danger-hover-border: rgba(239, 68, 68, 0.4);
+
+  --vanta-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+  --vanta-shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --vanta-modal-backdrop: rgba(28, 28, 30, 0.4);
+  --vanta-gradient-start: #111112;
+  --vanta-navbar-bg: rgba(255, 255, 255, 0.85);
+}
+
+/* Accent Selection: Dark Mode */
+[data-theme="dark"][data-accent="purple"],
+:root:not([data-theme="light"])[data-accent="purple"],
+:root:not([data-theme="light"]):not([data-accent]) {
+  --vanta-accent: #8b5cf6;
+  --vanta-accent-hover: #7c3aed;
+  --vanta-accent-rgb: 139, 92, 246;
+}
+
+[data-theme="dark"][data-accent="blue"],
+:root:not([data-theme="light"])[data-accent="blue"] {
+  --vanta-accent: #3b82f6;
+  --vanta-accent-hover: #2563eb;
+  --vanta-accent-rgb: 59, 130, 246;
+}
+
+[data-theme="dark"][data-accent="emerald"],
+:root:not([data-theme="light"])[data-accent="emerald"] {
+  --vanta-accent: #10b981;
+  --vanta-accent-hover: #059669;
+  --vanta-accent-rgb: 16, 185, 129;
+}
+
+[data-theme="dark"][data-accent="rose"],
+:root:not([data-theme="light"])[data-accent="rose"] {
+  --vanta-accent: #f43f5e;
+  --vanta-accent-hover: #e11d48;
+  --vanta-accent-rgb: 244, 63, 94;
+}
+
+[data-theme="dark"][data-accent="amber"],
+:root:not([data-theme="light"])[data-accent="amber"] {
+  --vanta-accent: #f59e0b;
+  --vanta-accent-hover: #d97706;
+  --vanta-accent-rgb: 245, 158, 11;
+}
+
+/* Accent Selection: Light Mode */
+[data-theme="light"][data-accent="purple"],
+[data-theme="light"]:not([data-accent]) {
+  --vanta-accent: #7c3aed;
+  --vanta-accent-hover: #6d28d9;
+  --vanta-accent-rgb: 124, 58, 237;
+}
+
+[data-theme="light"][data-accent="blue"] {
+  --vanta-accent: #1d4ed8;
+  --vanta-accent-hover: #1e40af;
+  --vanta-accent-rgb: 29, 78, 216;
+}
+
+[data-theme="light"][data-accent="emerald"] {
+  --vanta-accent: #047857;
+  --vanta-accent-hover: #065f46;
+  --vanta-accent-rgb: 4, 120, 87;
+}
+
+[data-theme="light"][data-accent="rose"] {
+  --vanta-accent: #be123c;
+  --vanta-accent-hover: #9f1239;
+  --vanta-accent-rgb: 190, 18, 60;
+}
+
+[data-theme="light"][data-accent="amber"] {
+  --vanta-accent: #b45309;
+  --vanta-accent-hover: #92400e;
+  --vanta-accent-rgb: 180, 83, 9;
 }
 
 * {
@@ -44,7 +171,7 @@ body,
 
 body {
   margin: 0;
-  display: flex;
+  /* display: flex; */
   min-width: 320px;
   min-height: 100vh;
 }
@@ -55,8 +182,13 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner {
