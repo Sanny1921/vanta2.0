@@ -68,119 +68,178 @@ function LiveConversationDemo() {
 
   return (
     <div className="chat-preview-card">
-      <div className="preview-header">
-        <span className="preview-title">▲ VANTA</span>
-        <div className="preview-status-badge">
-          <span className="pulse-dot"></span>
-          <span>live-preview</span>
+      {/* Replicated RoomHeader layout */}
+      <div className="room-header preview-header" style={{ height: '52px', padding: '0 16px', borderBottom: '1px solid var(--vanta-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--vanta-surface)' }}>
+        <div className="room-header-left">
+          <span className="room-title" style={{ fontSize: '14px', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: '800' }}>VANTA</span>
+        </div>
+        <div className="room-header-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div className="voice-btn-wrapper">
+            <button className="btn-voice-call" disabled title="Voice call" style={{ cursor: 'default', padding: '4px' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </button>
+          </div>
+          <div className="room-header-right">
+            <button className="btn-menu-trigger" disabled style={{ cursor: 'default', padding: '2px 4px', fontSize: '18px' }}>⋮</button>
+          </div>
         </div>
       </div>
+      
       <div ref={messagesContainerRef} className={`preview-messages ${isFading ? 'fading' : ''}`}>
         {showRoomCreated && (
-          <div className="preview-system-msg animate-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M12 5v14M5 12h14" /></svg>
-            Room created
+          <div className="system-message-row" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '4px 0' }}>
+            <div className="system-message-content" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)', borderRadius: '20px', padding: '4px 12px', fontSize: '10px', color: 'var(--vanta-text-secondary)' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M12 5v14M5 12h14" /></svg>
+              <span className="system-text" style={{ fontWeight: '500' }}>Room created</span>
+            </div>
           </div>
         )}
         {showAlexJoin && (
-          <div className="preview-system-msg animate-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
-            Alex joined
+          <div className="system-message-row" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '4px 0' }}>
+            <div className="system-message-content" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)', borderRadius: '20px', padding: '4px 12px', fontSize: '10px', color: 'var(--vanta-text-secondary)' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+              <span className="system-text" style={{ fontWeight: '500' }}>Alex joined</span>
+            </div>
           </div>
         )}
         {showAlexMsg && (
-          <div className="preview-user-msg animate-message">
-            <div className="avatar">A</div>
-            <div className="msg-content">
-              <div className="msg-header">Alex</div>
-              <div className="msg-body">Need everyone online in 5 minutes.</div>
+          <div className="message-row" style={{ display: 'flex', gap: '10px', width: '100%', alignItems: 'flex-start', marginBottom: '4px' }}>
+            <div className="message-avatar" style={{ width: '28px', height: '28px', minWidth: '28px', borderRadius: '50%', backgroundColor: 'rgba(139, 92, 246, 0.12)', color: 'var(--vanta-accent)', border: '1px solid rgba(139, 92, 246, 0.25)', fontWeight: '700', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A</div>
+            <div className="message-body" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+              <div className="message-header-info" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="message-sender-name" style={{ fontSize: '11.5px', fontWeight: '600', color: 'var(--vanta-accent)' }}>Alex</span>
+                <span className="message-timestamp" style={{ fontSize: '9px', color: 'var(--vanta-text-muted)' }}>10:00 PM</span>
+              </div>
+              <div className="message-text-content" style={{ fontSize: '12px', color: 'var(--vanta-text-primary)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                Need everyone online in 5 minutes.
+              </div>
             </div>
           </div>
         )}
         {showSamJoin && (
-          <div className="preview-system-msg animate-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
-            Sam joined
+          <div className="system-message-row" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '4px 0' }}>
+            <div className="system-message-content" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)', borderRadius: '20px', padding: '4px 12px', fontSize: '10px', color: 'var(--vanta-text-secondary)' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+              <span className="system-text" style={{ fontWeight: '500' }}>Sam joined</span>
+            </div>
           </div>
         )}
         {showSamMsg && (
-          <div className="preview-user-msg animate-message">
-            <div className="avatar violet">S</div>
-            <div className="msg-content">
-              <div className="msg-header">Sam</div>
-              <div className="msg-body">Joining now.</div>
+          <div className="message-row own" style={{ display: 'flex', gap: '10px', width: '100%', alignItems: 'flex-start', marginBottom: '4px' }}>
+            <div className="message-avatar" style={{ width: '28px', height: '28px', minWidth: '28px', borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--vanta-text-primary)', border: '1px solid var(--vanta-border)', fontWeight: '700', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>S</div>
+            <div className="message-body" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+              <div className="message-header-info" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="message-sender-name" style={{ fontSize: '11.5px', fontWeight: '600', color: '#a78bfa' }}>Sam</span>
+                <span className="message-timestamp" style={{ fontSize: '9px', color: 'var(--vanta-text-muted)' }}>10:01 PM</span>
+              </div>
+              <div className="message-text-content" style={{ fontSize: '12px', color: 'var(--vanta-text-primary)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                Joining now.
+              </div>
             </div>
           </div>
         )}
         {showRahulJoin && (
-          <div className="preview-system-msg animate-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
-            Rahul joined
+          <div className="system-message-row" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '4px 0' }}>
+            <div className="system-message-content" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)', borderRadius: '20px', padding: '4px 12px', fontSize: '10px', color: 'var(--vanta-text-secondary)' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+              <span className="system-text" style={{ fontWeight: '500' }}>Rahul joined</span>
+            </div>
           </div>
         )}
         {showRahulMsg && (
-          <div className="preview-user-msg animate-message">
-            <div className="avatar gray">R</div>
-            <div className="msg-content">
-              <div className="msg-header">Rahul</div>
-              <div className="msg-body">On my way.</div>
+          <div className="message-row" style={{ display: 'flex', gap: '10px', width: '100%', alignItems: 'flex-start', marginBottom: '4px' }}>
+            <div className="message-avatar" style={{ width: '28px', height: '28px', minWidth: '28px', borderRadius: '50%', backgroundColor: 'rgba(139, 92, 246, 0.12)', color: 'var(--vanta-accent)', border: '1px solid rgba(139, 92, 246, 0.25)', fontWeight: '700', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>R</div>
+            <div className="message-body" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+              <div className="message-header-info" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="message-sender-name" style={{ fontSize: '11.5px', fontWeight: '600', color: 'var(--vanta-accent)' }}>Rahul</span>
+                <span className="message-timestamp" style={{ fontSize: '9px', color: 'var(--vanta-text-muted)' }}>10:01 PM</span>
+              </div>
+              <div className="message-text-content" style={{ fontSize: '12px', color: 'var(--vanta-text-primary)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                On my way.
+              </div>
             </div>
           </div>
         )}
         {showAlexMsg2 && (
-          <div className="preview-user-msg animate-message">
-            <div className="avatar">A</div>
-            <div className="msg-content">
-              <div className="msg-header">Alex</div>
-              <div className="msg-body">Perfect.</div>
+          <div className="message-row" style={{ display: 'flex', gap: '10px', width: '100%', alignItems: 'flex-start', marginBottom: '4px' }}>
+            <div className="message-avatar" style={{ width: '28px', height: '28px', minWidth: '28px', borderRadius: '50%', backgroundColor: 'rgba(139, 92, 246, 0.12)', color: 'var(--vanta-accent)', border: '1px solid rgba(139, 92, 246, 0.25)', fontWeight: '700', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A</div>
+            <div className="message-body" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+              <div className="message-header-info" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="message-sender-name" style={{ fontSize: '11.5px', fontWeight: '600', color: 'var(--vanta-accent)' }}>Alex</span>
+                <span className="message-timestamp" style={{ fontSize: '9px', color: 'var(--vanta-text-muted)' }}>10:02 PM</span>
+              </div>
+              <div className="message-text-content" style={{ fontSize: '12px', color: 'var(--vanta-text-primary)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                Perfect.
+              </div>
             </div>
           </div>
         )}
         {showSamMsg2 && (
-          <div className="preview-user-msg animate-message">
-            <div className="avatar violet">S</div>
-            <div className="msg-content">
-              <div className="msg-header">Sam</div>
-              <div className="msg-body">Let's start.</div>
+          <div className="message-row own" style={{ display: 'flex', gap: '10px', width: '100%', alignItems: 'flex-start', marginBottom: '4px' }}>
+            <div className="message-avatar" style={{ width: '28px', height: '28px', minWidth: '28px', borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--vanta-text-primary)', border: '1px solid var(--vanta-border)', fontWeight: '700', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>S</div>
+            <div className="message-body" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+              <div className="message-header-info" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="message-sender-name" style={{ fontSize: '11.5px', fontWeight: '600', color: '#a78bfa' }}>Sam</span>
+                <span className="message-timestamp" style={{ fontSize: '9px', color: 'var(--vanta-text-muted)' }}>10:02 PM</span>
+              </div>
+              <div className="message-text-content" style={{ fontSize: '12px', color: 'var(--vanta-text-primary)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                Let's start.
+              </div>
             </div>
           </div>
         )}
         {showRahulMsg2 && (
-          <div className="preview-user-msg animate-message">
-            <div className="avatar gray">R</div>
-            <div className="msg-content">
-              <div className="msg-header">Rahul</div>
-              <div className="msg-body">Ready.</div>
+          <div className="message-row" style={{ display: 'flex', gap: '10px', width: '100%', alignItems: 'flex-start', marginBottom: '4px' }}>
+            <div className="message-avatar" style={{ width: '28px', height: '28px', minWidth: '28px', borderRadius: '50%', backgroundColor: 'rgba(139, 92, 246, 0.12)', color: 'var(--vanta-accent)', border: '1px solid rgba(139, 92, 246, 0.25)', fontWeight: '700', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>R</div>
+            <div className="message-body" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+              <div className="message-header-info" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="message-sender-name" style={{ fontSize: '11.5px', fontWeight: '600', color: 'var(--vanta-accent)' }}>Rahul</span>
+                <span className="message-timestamp" style={{ fontSize: '9px', color: 'var(--vanta-text-muted)' }}>10:03 PM</span>
+              </div>
+              <div className="message-text-content" style={{ fontSize: '12px', color: 'var(--vanta-text-primary)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                Ready.
+              </div>
             </div>
           </div>
         )}
         {showFinished && (
-          <div className="preview-system-msg animate-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-            Conversation finished
+          <div className="system-message-row" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '4px 0' }}>
+            <div className="system-message-content" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)', borderRadius: '20px', padding: '4px 12px', fontSize: '10px', color: 'var(--vanta-text-secondary)' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+              <span className="system-text" style={{ fontWeight: '500' }}>Conversation finished</span>
+            </div>
           </div>
         )}
         {showExpired && (
-          <div className="preview-system-msg animate-message warning-sys-msg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            Room expired
+          <div className="system-message-row" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '4px 0' }}>
+            <div className="system-message-content warning-sys-msg" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '20px', padding: '4px 12px', fontSize: '10px', color: '#f87171' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+              <span className="system-text" style={{ fontWeight: '500' }}>Room expired</span>
+            </div>
           </div>
         )}
 
         {showRemoved && (
-          <div className="preview-expired-overlay">
-            <div className="expired-badge" style={{ borderColor: 'rgba(255, 255, 255, 0.08)', background: 'rgba(8, 7, 12, 0.95)', color: '#ffffff' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>
-              Room removed
+          <div className="preview-expired-overlay" style={{ background: 'rgba(18, 16, 26, 0.85)' }}>
+            <div className="room-deleted-message" style={{ padding: '16px 24px', fontSize: '13px', borderRadius: '10px' }}>
+              Room has been deleted. Redirecting to home...
             </div>
           </div>
         )}
       </div>
-      <div className="preview-composer">
-        <button className="preview-btn-attachment" disabled>📎</button>
-        <input type="text" className="composer-input" placeholder="Type a message..." disabled />
-        <button className="preview-btn-emoji" disabled>😀</button>
-        <button className="btn-composer-send" disabled>Send</button>
+      <div className="preview-composer" style={{ padding: '10px 16px', gap: '8px', background: 'var(--vanta-surface)', borderTop: '1px solid var(--vanta-border)', boxSizing: 'border-box' }}>
+        <button className="preview-btn-attachment" disabled aria-label="Attachment" style={{ height: '32px', width: '32px', minWidth: '32px', borderRadius: '6px', background: 'none', border: '1px solid var(--vanta-border)', color: 'var(--vanta-text-muted)' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+        </button>
+        <input type="text" className="composer-input" placeholder="Type a message..." disabled style={{ height: '32px', borderRadius: '6px', background: 'var(--vanta-input)', border: '1px solid var(--vanta-border)', padding: '6px 10px', fontSize: '12px', minWidth: '0', flex: '1', color: 'var(--vanta-text-primary)' }} />
+        <button className="preview-btn-emoji" disabled aria-label="Emoji" style={{ height: '32px', width: '32px', minWidth: '32px', borderRadius: '6px', background: 'none', border: '1px solid var(--vanta-border)', color: 'var(--vanta-text-muted)' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
+        </button>
+        <button className="btn-composer-send" disabled aria-label="Send message" style={{ height: '32px', width: '32px', minWidth: '32px', borderRadius: '6px', backgroundColor: 'var(--vanta-accent)', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
       </div>
     </div>
   );
@@ -199,6 +258,36 @@ export default function Home() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  // Close menu on click outside and escape key
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Create room form
   const [createForm, setCreateForm] = useState({
@@ -510,13 +599,17 @@ export default function Home() {
         <div className="navbar-logo">
           <span className="logo-icon">▲</span> VANTA
         </div>
-        <div className="navbar-links">
+
+        {/* Desktop links */}
+        <div className="navbar-links desktop-only">
           <a href="#home">Home</a>
           <a href="#how-it-works">How It Works</a>
           <a href="#why-vanta">Why Vanta</a>
           <a href="#faq">FAQ</a>
         </div>
-        <div className="navbar-actions">
+
+        {/* Desktop actions */}
+        <div className="navbar-actions desktop-only">
           <button className="btn-navbar-secondary" onClick={() => setIsJoinModalOpen(true)}>
             Join Room
           </button>
@@ -524,6 +617,54 @@ export default function Home() {
             Create Room
           </button>
         </div>
+
+        {/* Mobile menu trigger */}
+        <button
+          ref={triggerRef}
+          className="mobile-menu-trigger"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          )}
+        </button>
+
+        {/* Mobile compact floating dropdown menu */}
+        {isMobileMenuOpen && (
+          <div className="vanta-mobile-dropdown" ref={mobileMenuRef}>
+            <div className="dropdown-links">
+              <a href="#home" onClick={() => setIsMobileMenuOpen(false)}>Home</a>
+              <a href="#how-it-works" onClick={() => setIsMobileMenuOpen(false)}>How It Works</a>
+              <a href="#why-vanta" onClick={() => setIsMobileMenuOpen(false)}>Why Vanta</a>
+              <a href="#faq" onClick={() => setIsMobileMenuOpen(false)}>FAQ</a>
+            </div>
+            <div className="dropdown-divider"></div>
+            <div className="dropdown-actions">
+              <button
+                className="btn-dropdown-secondary"
+                onClick={() => {
+                  setIsJoinModalOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                Join Room
+              </button>
+              <button
+                className="btn-dropdown-primary"
+                onClick={() => {
+                  setIsCreateModalOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                Create Room
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* HERO SECTION */}
@@ -597,7 +738,8 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="comparison-table-wrapper">
+        {/* Desktop-only Table */}
+        <div className="comparison-table-wrapper desktop-only">
           <table className="vanta-comparison-table">
             <thead>
               <tr>
@@ -633,6 +775,81 @@ export default function Home() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile-only stacked comparison cards */}
+        <div className="comparison-cards-wrapper mobile-only">
+          <div className="comparison-card">
+            <h4 className="comparison-card-title">Identity & Accounts</h4>
+            <div className="comparison-card-row">
+              <span className="side-label">Traditional</span>
+              <span className="side-value traditional">Accounts Required</span>
+            </div>
+            <div className="comparison-card-row highlighted">
+              <span className="side-label">Vanta</span>
+              <span className="side-value vanta-value">No Account Required</span>
+            </div>
+          </div>
+
+          <div className="comparison-card">
+            <h4 className="comparison-card-title">User Profiles</h4>
+            <div className="comparison-card-row">
+              <span className="side-label">Traditional</span>
+              <span className="side-value traditional">Permanent Profiles</span>
+            </div>
+            <div className="comparison-card-row highlighted">
+              <span className="side-label">Vanta</span>
+              <span className="side-value vanta-value">No Profiles</span>
+            </div>
+          </div>
+
+          <div className="comparison-card">
+            <h4 className="comparison-card-title">Message Retention</h4>
+            <div className="comparison-card-row">
+              <span className="side-label">Traditional</span>
+              <span className="side-value traditional">Long-Term History</span>
+            </div>
+            <div className="comparison-card-row highlighted">
+              <span className="side-label">Vanta</span>
+              <span className="side-value vanta-value">Temporary Conversations</span>
+            </div>
+          </div>
+
+          <div className="comparison-card">
+            <h4 className="comparison-card-title">Core Philosophy</h4>
+            <div className="comparison-card-row">
+              <span className="side-label">Traditional</span>
+              <span className="side-value traditional">Identity-Focused</span>
+            </div>
+            <div className="comparison-card-row highlighted">
+              <span className="side-label">Vanta</span>
+              <span className="side-value vanta-value">Conversation-Focused</span>
+            </div>
+          </div>
+
+          <div className="comparison-card">
+            <h4 className="comparison-card-title">Room Expiration</h4>
+            <div className="comparison-card-row">
+              <span className="side-label">Traditional</span>
+              <span className="side-value traditional">Conversations Persist</span>
+            </div>
+            <div className="comparison-card-row highlighted">
+              <span className="side-label">Vanta</span>
+              <span className="side-value vanta-value">Automatic Expiration</span>
+            </div>
+          </div>
+
+          <div className="comparison-card">
+            <h4 className="comparison-card-title">Data Storage</h4>
+            <div className="comparison-card-row">
+              <span className="side-label">Traditional</span>
+              <span className="side-value traditional">Stored Indefinitely</span>
+            </div>
+            <div className="comparison-card-row highlighted">
+              <span className="side-label">Vanta</span>
+              <span className="side-value vanta-value">Temporary By Design</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* FAQ SECTION */}
@@ -644,7 +861,13 @@ export default function Home() {
             <div className={`faq-item ${activeFaqIndex === index ? 'active' : ''}`} key={index}>
               <button className="faq-question" onClick={() => toggleFaq(index)}>
                 <span>{item.question}</span>
-                <span className="faq-arrow">{activeFaqIndex === index ? '▲' : '▼'}</span>
+                <span className="faq-arrow">
+                  {activeFaqIndex === index ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  )}
+                </span>
               </button>
               <div className="faq-answer">
                 <p>{item.answer}</p>

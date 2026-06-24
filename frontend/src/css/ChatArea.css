@@ -246,3 +246,25 @@
     padding: 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .vanta-empty-state {
+    padding: 16px 8px;
+  }
+  .empty-state-card {
+    padding: 24px 16px;
+    max-width: 290px;
+    box-sizing: border-box;
+  }
+  .empty-state-card h3 {
+    font-size: 16px;
+  }
+  .empty-state-card p {
+    font-size: 12.5px;
+    margin-bottom: 20px;
+  }
+  .btn-copy-invite {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}

@@ -477,6 +477,7 @@
 
 .composer-input {
   flex: 1;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 6px !important;
@@ -488,14 +489,16 @@
 }
 
 .btn-composer-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--vanta-accent);
   color: #ffffff;
   border: none;
-  padding: 0 14px;
   height: 32px;
+  width: 32px;
+  min-width: 32px;
   border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -1289,24 +1292,40 @@
 /* RESPONSIVE DESIGN */
 @media (max-width: 1024px) {
   .hero-container-inner {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 50px;
     text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
   .hero-left {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .hero-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
   }
   .hero-title {
     text-align: center;
     width: 100%;
   }
   .hero-description {
+    width: 100%;
     max-width: 480px;
     margin-left: auto;
     margin-right: auto;
@@ -1315,6 +1334,7 @@
   .hero-buttons {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -1355,12 +1375,233 @@
   }
 }
 
-@media (max-width: 768px) {
-  .vanta-navbar {
-    padding: 0 30px;
+/* Responsive Utilities */
+.desktop-only {
+  display: block;
+}
+.mobile-only {
+  display: none !important;
+}
+
+/* Mobile Menu Trigger button styling */
+.mobile-menu-trigger {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 110;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-menu-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile Floating Dropdown */
+.vanta-mobile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  margin-top: 8px;
+  width: 260px;
+  background: rgba(12, 10, 18, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(139, 92, 246, 0.08);
+  padding: 16px;
+  z-index: 105;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transform-origin: top right;
+  animation: dropdownSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dropdownSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
   }
-  .navbar-links {
-    display: none;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dropdown-links a {
+  color: var(--vanta-text-secondary);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  display: block;
+  letter-spacing: 0.2px;
+  text-align: left;
+}
+
+.dropdown-links a:hover,
+.dropdown-links a:active {
+  color: #ffffff;
+  background: rgba(139, 92, 246, 0.08);
+  padding-left: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 12px 0;
+}
+
+.dropdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-dropdown-primary {
+  background-color: var(--vanta-accent);
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+}
+
+.btn-dropdown-primary:hover {
+  background-color: #7c3aed;
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
+}
+
+.btn-dropdown-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-dropdown-secondary {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.btn-dropdown-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-dropdown-secondary:active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Mobile Comparison Cards Styling */
+.comparison-cards-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.comparison-card {
+  background: rgba(18, 16, 26, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.comparison-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vanta-text-secondary);
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.comparison-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.01);
+  font-size: 13.5px;
+  box-sizing: border-box;
+}
+
+.comparison-card-row.highlighted {
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.side-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--vanta-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.side-value {
+  font-weight: 500;
+  color: var(--vanta-text-secondary);
+}
+
+.side-value.traditional {
+  color: var(--vanta-text-secondary);
+}
+
+.side-value.vanta-value {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: block !important;
+  }
+  .mobile-menu-trigger {
+    display: flex;
+  }
+  .vanta-navbar {
+    padding: 0 20px;
+    height: 64px;
   }
   .hero-section {
     padding: 100px 20px 40px 20px;
@@ -1369,11 +1610,14 @@
     gap: 30px;
   }
   .hero-title {
-    font-size: 38px;
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -1px;
     margin-bottom: 12px;
   }
   .hero-description {
     font-size: 15px;
+    line-height: 1.5;
     margin-bottom: 20px;
   }
   .hero-buttons {
@@ -1388,38 +1632,98 @@
   .hero-supporting-text {
     margin-top: 12px;
   }
+  .hero-right {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+  .chat-preview-card {
+    width: 100%;
+    max-width: 400px;
+    height: 360px;
+  }
   .feature-grid-new {
     grid-template-columns: 1fr;
     gap: 30px;
-  }
-  .footer-top-new {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 40px;
-  }
-  .footer-links-new {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
   }
   .info-value.truncate {
     max-width: 180px;
   }
   .section {
-    padding: 80px 20px;
+    padding: 60px 20px;
   }
   .section-title-new {
-    font-size: 32px;
+    font-size: 28px;
+    line-height: 1.25;
+    letter-spacing: -0.6px;
+    margin-bottom: 12px;
+  }
+  .section-subtitle-new {
+    font-size: 15px;
+    line-height: 1.45;
+    margin-bottom: 40px;
+  }
+  .why-vanta-positioning-intro p {
+    font-size: 15px;
+  }
+  .new-vanta-footer {
+    padding: 48px 24px 32px 24px;
+  }
+  .footer-top-new {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+  }
+  .footer-column {
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+  .brand-column {
+    margin-bottom: 8px;
+  }
+  .footer-column-title {
+    margin-bottom: 2px;
+  }
+  .footer-column-links {
+    align-items: center;
+    gap: 8px;
+  }
+  .footer-bottom-new {
+    margin-top: 24px;
+    padding-top: 16px;
   }
 }
 
 @media (max-width: 480px) {
+  .section {
+    padding: 48px 16px;
+  }
   .hero-section {
     padding: 90px 16px 30px 16px;
   }
   .hero-title {
-    font-size: 32px;
+    font-size: 28px;
+  }
+  .section-title-new {
+    font-size: 22px;
+  }
+  .section-subtitle-new {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+  .why-vanta-positioning-intro p {
+    font-size: 14px;
+  }
+  .how-step-card h3 {
+    font-size: 15px;
+  }
+  .how-step-card p {
+    font-size: 13px;
   }
   .hero-buttons {
     flex-direction: column;
@@ -1733,24 +2037,12 @@
   margin: 0;
 }
 
-@media (max-width: 768px) {
-  .footer-column {
-    align-items: center;
-    text-align: center;
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 24px !important;
   }
-  .brand-column {
-    max-width: 100%;
-  }
-  .footer-column-links {
-    align-items: center;
-  }
-}
-
-@media (max-width: 640px) {
-  .vanta-comparison-table th,
-  .vanta-comparison-table td {
-    padding: 14px 18px;
-    font-size: 13px;
+  .section-title-new {
+    font-size: 20px !important;
   }
 }
 

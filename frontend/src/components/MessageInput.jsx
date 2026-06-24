@@ -203,6 +203,12 @@ const CATEGORIES = ['All', 'Smileys', 'Gestures', 'Hearts', 'Symbols', 'Animals'
 
 const BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
+
 export default function MessageInput({
   onSendMessage,
   onSendVoiceMessage,
@@ -545,7 +551,7 @@ export default function MessageInput({
   });
 
   return (
-    <div className="message-input-form-wrapper" style={{ position: 'relative', width: '100%' }}>
+    <div className="message-input-footer">
       {showEmojiPicker && (
         <div className="vanta-emoji-picker" ref={pickerWrapperRef}>
           <div className="emoji-picker-search-container">
@@ -594,21 +600,53 @@ export default function MessageInput({
       )}
 
       {isRecording ? (
-        <div className="recording-state-container">
-          <div className="recording-indicator">
-            <span className="pulsing-dot" />
-            <span className="recording-label">Recording: {recordingTime}s / 60s</span>
-          </div>
-          <button type="button" className="btn-discard-voice" onClick={discardRecording}>
-            Discard
+        <div className="recording-state-layout">
+          <button
+            type="button"
+            className="btn-discard-voice"
+            onClick={discardRecording}
+            title="Discard recording"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6" />
+            </svg>
           </button>
-          <button type="button" className="btn-stop-voice" onClick={stopRecording}>
-            Stop & Preview
+          
+          <div className="recording-status-bar">
+            <div className="recording-indicator">
+              <span className="pulsing-dot" />
+              <span className="recording-label">REC</span>
+            </div>
+            <span className="recording-timer">
+              {formatTime(recordingTime)} / 1:00
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="btn-stop-voice"
+            onClick={stopRecording}
+            title="Stop & Preview"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="2" />
+            </svg>
           </button>
         </div>
       ) : audioUrl ? (
-        <div className="preview-state-container">
-          <div className="voice-preview-controls">
+        <div className="preview-state-layout">
+          <button
+            type="button"
+            className="btn-discard-voice"
+            onClick={discardRecording}
+            title="Discard recording"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6" />
+            </svg>
+          </button>
+
+          <div className="voice-preview-bar">
             <button
               type="button"
               className="btn-preview-play-pause"
@@ -638,15 +676,22 @@ export default function MessageInput({
               }}
             />
             <span className="preview-time-display">
-              {Math.floor(previewProgress)}s / {recordingTime}s
+              {formatTime(previewProgress)} / {formatTime(recordingTime)}
             </span>
           </div>
-          <button type="button" className="btn-discard-voice" onClick={discardRecording}>
-            Discard
+
+          <button
+            type="button"
+            className="btn-send-voice"
+            onClick={sendVoiceMessage}
+            title="Send voice message"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
           </button>
-          <button type="button" className="btn-send-voice" onClick={sendVoiceMessage}>
-            Send
-          </button>
+          
           <audio
             ref={previewAudioRef}
             src={audioUrl}
@@ -664,7 +709,7 @@ export default function MessageInput({
             disabled={disabled}
             title="Attach file"
           >
-            📎
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
           </button>
           <input
             ref={inputRef}
@@ -683,7 +728,7 @@ export default function MessageInput({
             disabled={disabled}
             title="Add emoji"
           >
-            😀
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
           </button>
           {message.trim() ? (
             <button
@@ -693,7 +738,7 @@ export default function MessageInput({
               disabled={disabled}
               title="Send message"
             >
-              Send
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           ) : (
             <button
@@ -704,7 +749,7 @@ export default function MessageInput({
               disabled={disabled}
               title="Record voice message"
             >
-              🎙️
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" /></svg>
             </button>
           )}
         </form>
