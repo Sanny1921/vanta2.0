@@ -408,6 +408,19 @@ export default function MessageInput({
     }
   };
 
+  // Focus the input when replyingTo changes to a truthy value
+  useEffect(() => {
+    if (replyingTo) {
+      if (isRecording || audioBlob || audioUrl) {
+        discardRecording();
+      }
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [replyingTo, isRecording, audioBlob, audioUrl]);
+
   // Preview controls
   const togglePreviewPlay = () => {
     if (!previewAudioRef.current) return;
