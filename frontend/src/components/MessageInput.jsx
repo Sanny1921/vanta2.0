@@ -240,6 +240,7 @@ export default function MessageInput({
   const [previewProgress, setPreviewProgress] = useState(0);
 
   const inputRef = useRef(null);
+  const prevReplyingToIdRef = useRef(null);
   const pickerWrapperRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioStreamRef = useRef(null);
@@ -410,15 +411,15 @@ export default function MessageInput({
 
   // Focus the input when replyingTo changes to a truthy value
   useEffect(() => {
-    if (replyingTo) {
-      if (isRecording || audioBlob || audioUrl) {
-        discardRecording();
+    if (replyingTo && replyingTo.messageId !== prevReplyingToIdRef.current) {
+      if (!isRecording && !audioBlob && !audioUrl) {
+        const timer = setTimeout(() => {
+          inputRef.current?.focus();
+        }, 50);
+        return () => clearTimeout(timer);
       }
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 50);
-      return () => clearTimeout(timer);
     }
+    prevReplyingToIdRef.current = replyingTo?.messageId || null;
   }, [replyingTo, isRecording, audioBlob, audioUrl]);
 
   // Preview controls
