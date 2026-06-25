@@ -36,10 +36,10 @@
   --vanta-gradient-start: #ffffff;
   --vanta-navbar-bg: rgba(8, 7, 12, 0.85);
 
-  /* Default Accent is Purple */
-  --vanta-accent: #8b5cf6;
-  --vanta-accent-hover: #7c3aed;
-  --vanta-accent-rgb: 139, 92, 246;
+  /* Default Accent is Emerald */
+  --vanta-accent: #10b981;
+  --vanta-accent-hover: #059669;
+  --vanta-accent-rgb: 16, 185, 129;
 
   color: var(--vanta-text-primary);
   background-color: var(--vanta-bg);
@@ -87,8 +87,7 @@
 
 /* Accent Selection: Dark Mode */
 [data-theme="dark"][data-accent="purple"],
-:root:not([data-theme="light"])[data-accent="purple"],
-:root:not([data-theme="light"]):not([data-accent]) {
+:root:not([data-theme="light"])[data-accent="purple"] {
   --vanta-accent: #8b5cf6;
   --vanta-accent-hover: #7c3aed;
   --vanta-accent-rgb: 139, 92, 246;
@@ -102,7 +101,8 @@
 }
 
 [data-theme="dark"][data-accent="emerald"],
-:root:not([data-theme="light"])[data-accent="emerald"] {
+:root:not([data-theme="light"])[data-accent="emerald"],
+:root:not([data-theme="light"]):not([data-accent]) {
   --vanta-accent: #10b981;
   --vanta-accent-hover: #059669;
   --vanta-accent-rgb: 16, 185, 129;
@@ -123,8 +123,7 @@
 }
 
 /* Accent Selection: Light Mode */
-[data-theme="light"][data-accent="purple"],
-[data-theme="light"]:not([data-accent]) {
+[data-theme="light"][data-accent="purple"] {
   --vanta-accent: #7c3aed;
   --vanta-accent-hover: #6d28d9;
   --vanta-accent-rgb: 124, 58, 237;
@@ -136,7 +135,8 @@
   --vanta-accent-rgb: 29, 78, 216;
 }
 
-[data-theme="light"][data-accent="emerald"] {
+[data-theme="light"][data-accent="emerald"],
+[data-theme="light"]:not([data-accent]) {
   --vanta-accent: #047857;
   --vanta-accent-hover: #065f46;
   --vanta-accent-rgb: 4, 120, 87;

@@ -84,6 +84,14 @@ class SocketManager {
         this.handleTypingStop(io, socket, data)
       );
 
+      socket.on(SOCKET_EVENTS.RECORDING_START, (data) =>
+        this.handleRecordingStart(io, socket, data)
+      );
+
+      socket.on(SOCKET_EVENTS.RECORDING_STOP, (data) =>
+        this.handleRecordingStop(io, socket, data)
+      );
+
       socket.on(SOCKET_EVENTS.LEAVE_ROOM, (data) =>
         this.handleLeaveRoom(io, socket, data)
       );
@@ -562,7 +570,7 @@ class SocketManager {
    */
   handleMessageSend(io, socket, data) {
     try {
-      const { roomId, content, type, mediaUrl, duration } = data;
+      const { roomId, content, type, mediaUrl, duration, replyTo } = data;
       const isVoice = type === 'voice';
 
       if (!roomId) return;
@@ -625,7 +633,8 @@ class SocketManager {
         isHost,
         type || 'text',
         mediaUrl || null,
-        duration || null
+        duration || null,
+        replyTo || null
       );
 
       console.log(`[Socket] Message in room ${roomId}: ${message.messageId} (Type: ${message.type})`);
@@ -642,7 +651,8 @@ class SocketManager {
         duration: message.duration,
         createdAt: message.createdAt,
         expiresAt: message.expiresAt,
-        isHost: message.isHost
+        isHost: message.isHost,
+        replyTo: message.replyTo
       });
     } catch (error) {
       console.error('[Socket] Error sending message:', error);
@@ -825,6 +835,30 @@ class SocketManager {
     if (!socketInfo || socketInfo.roomId !== roomId) return;
 
     io.to(roomId).emit(SOCKET_EVENTS.TYPING_STOP, {
+      displayName: socketInfo.displayName
+    });
+  }
+
+  handleRecordingStart(io, socket, data) {
+    const { roomId } = data;
+    if (!roomId) return;
+
+    const socketInfo = roomManager.getSocketInfo(socket.id);
+    if (!socketInfo || socketInfo.roomId !== roomId) return;
+
+    io.to(roomId).emit(SOCKET_EVENTS.RECORDING_START, {
+      displayName: socketInfo.displayName
+    });
+  }
+
+  handleRecordingStop(io, socket, data) {
+    const { roomId } = data;
+    if (!roomId) return;
+
+    const socketInfo = roomManager.getSocketInfo(socket.id);
+    if (!socketInfo || socketInfo.roomId !== roomId) return;
+
+    io.to(roomId).emit(SOCKET_EVENTS.RECORDING_STOP, {
       displayName: socketInfo.displayName
     });
   }

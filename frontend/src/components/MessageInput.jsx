@@ -214,8 +214,12 @@ export default function MessageInput({
   onSendVoiceMessage,
   onTypingStart,
   onTypingStop,
+  onRecordingStart = () => {},
+  onRecordingStop = () => {},
   disabled,
-  roomId
+  roomId,
+  replyingTo = null,
+  onCancelReply = () => {}
 }) {
   const [message, setMessage] = useState('');
   const { showToast } = useUI();
@@ -327,6 +331,10 @@ export default function MessageInput({
       setRecordingTime(0);
       setIsRecording(true);
 
+      if (onRecordingStart) {
+        onRecordingStart();
+      }
+
       mediaRecorder.start();
 
       recordingTimerRef.current = setInterval(() => {
@@ -361,6 +369,9 @@ export default function MessageInput({
     }
 
     setIsRecording(false);
+    if (onRecordingStop) {
+      onRecordingStop();
+    }
   };
 
   // Discard Recording/Preview
@@ -384,12 +395,17 @@ export default function MessageInput({
       URL.revokeObjectURL(audioUrl);
     }
 
+    const wasRecording = isRecording;
     setIsRecording(false);
     setRecordingTime(0);
     setAudioBlob(null);
     setAudioUrl(null);
     setIsPlayingPreview(false);
     setPreviewProgress(0);
+
+    if (wasRecording && onRecordingStop) {
+      onRecordingStop();
+    }
   };
 
   // Preview controls
@@ -552,6 +568,30 @@ export default function MessageInput({
 
   return (
     <div className="message-input-footer">
+      {replyingTo && (
+        <div className="reply-bar">
+          <div className="reply-bar-left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="reply-arrow-icon" style={{ flexShrink: 0, color: 'var(--vanta-accent)' }}><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+            <div className="reply-bar-info">
+              <span className="reply-to-user">Replying to {replyingTo.senderDisplayName}</span>
+              <span className="reply-to-text">
+                {replyingTo.type === 'voice' 
+                  ? `Voice message • ${formatTime(replyingTo.duration)}` 
+                  : replyingTo.content}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn-cancel-reply"
+            onClick={onCancelReply}
+            title="Cancel reply"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {showEmojiPicker && (
         <div className="vanta-emoji-picker" ref={pickerWrapperRef}>
           <div className="emoji-picker-search-container">
@@ -763,7 +803,11 @@ MessageInput.propTypes = {
   onSendVoiceMessage: PropTypes.func.isRequired,
   onTypingStart: PropTypes.func.isRequired,
   onTypingStop: PropTypes.func.isRequired,
+  onRecordingStart: PropTypes.func,
+  onRecordingStop: PropTypes.func,
   disabled: PropTypes.bool,
-  roomId: PropTypes.string.isRequired
+  roomId: PropTypes.string.isRequired,
+  replyingTo: PropTypes.object,
+  onCancelReply: PropTypes.func
 };
 

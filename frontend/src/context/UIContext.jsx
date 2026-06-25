@@ -9,7 +9,7 @@ export const UIProvider = ({ children }) => {
   const [alertModal, setAlertModal] = useState(null); // { title, message, type, resolve }
 
   const [theme, setTheme] = useState(() => localStorage.getItem('vanta_theme') || 'dark');
-  const [accent, setAccent] = useState(() => localStorage.getItem('vanta_accent') || 'purple');
+  const [accent, setAccent] = useState(() => localStorage.getItem('vanta_accent') || 'emerald');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

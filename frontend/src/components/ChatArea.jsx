@@ -9,7 +9,8 @@ export default function ChatArea({
   currentUserId,
   isRoomDeleted,
   messagesEndRef,
-  roomId
+  roomId,
+  onReply
 }) {
   const { showToast } = useUI();
   const hasUserMessages = messages.some(msg => msg.type === 'user' || msg.type === 'voice');
@@ -24,6 +25,54 @@ export default function ChatArea({
 
   const getInitials = (name) => {
     return name ? name.trim().charAt(0).toUpperCase() : '?';
+  };
+
+  const formatVoiceDuration = (seconds) => {
+    if (isNaN(seconds) || seconds === null || seconds === undefined) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const handleReplyClick = (replyToId) => {
+    const originalEl = document.getElementById(`msg-${replyToId}`);
+    if (originalEl) {
+      originalEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      originalEl.classList.remove('highlight-flash');
+      void originalEl.offsetWidth; // force repaint
+      originalEl.classList.add('highlight-flash');
+      setTimeout(() => {
+        originalEl.classList.remove('highlight-flash');
+      }, 1000);
+    }
+  };
+
+  const renderReplyPreview = (msg) => {
+    if (!msg.replyTo) return null;
+    const originalMessage = messages.find(m => m.messageId === msg.replyTo);
+    if (originalMessage) {
+      return (
+        <div 
+          className="message-reply-preview clickable"
+          onClick={() => handleReplyClick(msg.replyTo)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="reply-preview-icon" style={{ color: 'var(--vanta-accent)', flexShrink: 0 }}><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+          <span className="reply-preview-sender">{originalMessage.senderDisplayName}</span>
+          <span className="reply-preview-text">
+            {originalMessage.type === 'voice' 
+              ? `Voice message • ${formatVoiceDuration(originalMessage.duration)}` 
+              : originalMessage.content}
+          </span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="message-reply-preview expired">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="reply-preview-icon" style={{ color: 'var(--vanta-text-muted)', flexShrink: 0 }}><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+          <span className="reply-preview-text">Reply to expired message</span>
+        </div>
+      );
+    }
   };
 
   // Helper to format system messages cleanly with SVG icons
@@ -101,6 +150,7 @@ export default function ChatArea({
           return (
             <div
               key={msg.messageId}
+              id={`msg-${msg.messageId}`}
               className={`message-row ${isOwn ? 'own' : ''}`}
             >
               <div className="message-avatar">
@@ -122,7 +172,19 @@ export default function ChatArea({
                       minute: '2-digit'
                     })}
                   </span>
+                  {!isRoomDeleted && onReply && (
+                    <button
+                      type="button"
+                      className="btn-message-reply"
+                      onClick={() => onReply(msg)}
+                      title="Reply to message"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                      <span>Reply</span>
+                    </button>
+                  )}
                 </div>
+                {renderReplyPreview(msg)}
                 <div className="message-text-content">
                   {msg.type === 'voice' ? (
                     <VoicePlayer
@@ -159,5 +221,6 @@ ChatArea.propTypes = {
   currentUserId: PropTypes.string,
   isRoomDeleted: PropTypes.bool.isRequired,
   messagesEndRef: PropTypes.object,
-  roomId: PropTypes.string.isRequired
+  roomId: PropTypes.string.isRequired,
+  onReply: PropTypes.func
 };

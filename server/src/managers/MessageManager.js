@@ -16,7 +16,8 @@ class MessageManager {
     isHost = false,
     type = 'text',
     mediaUrl = null,
-    duration = null
+    duration = null,
+    replyTo = null
   ) {
     const messageId = generateId('MSG');
     const createdAt = getCurrentTimestamp();
@@ -40,7 +41,8 @@ class MessageManager {
       duration,
       createdAt,
       expiresAt: createdAt + msgExpiryMs,
-      isHost
+      isHost,
+      replyTo
     };
 
     // Initialize room messages if not exists

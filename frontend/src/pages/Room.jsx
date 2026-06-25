@@ -39,11 +39,16 @@ export default function Room() {
     clearRoom,
     terminateRoom,
     leaveRoom,
-    joinRoom
+    joinRoom,
+    typingUsers,
+    recordingUsers,
+    addRecordingUser,
+    removeRecordingUser
   } = useRoom();
 
   const [activeModal, setActiveModal] = useState(null); // 'participants' | 'details' | 'manage' | null
   const [roomDeleted, setRoomDeleted] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
   const [isInVoiceCall, setIsInVoiceCall] = useState(false);
   const [isJoiningVoiceCall, setIsJoiningVoiceCall] = useState(false);
   const [isVoiceMuted, setIsVoiceMuted] = useState(false);
@@ -180,7 +185,8 @@ export default function Room() {
         isHost: data.isHost,
         type: data.type || 'user',
         mediaUrl: data.mediaUrl || null,
-        duration: data.duration || null
+        duration: data.duration || null,
+        replyTo: data.replyTo || null
       };
       addMessage(message);
     });
@@ -210,6 +216,8 @@ export default function Room() {
           createdAt: Date.now()
         });
         removeUser(data.user.roomUserId);
+        removeTypingUser(data.user.displayName);
+        removeRecordingUser(data.user.displayName);
         webRTCService.closePeerConnection(data.user.roomUserId);
         webRTCService.closeVoicePeerConnection(data.user.roomUserId);
       }
@@ -221,6 +229,14 @@ export default function Room() {
 
     socketService.on(SOCKET_EVENTS.TYPING_STOP, (data) => {
       removeTypingUser(data.displayName);
+    });
+
+    socketService.on(SOCKET_EVENTS.RECORDING_START, (data) => {
+      addRecordingUser(data.displayName);
+    });
+
+    socketService.on(SOCKET_EVENTS.RECORDING_STOP, (data) => {
+      removeRecordingUser(data.displayName);
     });
 
     socketService.on(SOCKET_EVENTS.ROOM_TERMINATION_WARNING, (data) => {
@@ -368,6 +384,8 @@ export default function Room() {
       socketService.off(SOCKET_EVENTS.ROOM_USERS_UPDATED);
       socketService.off(SOCKET_EVENTS.TYPING_START);
       socketService.off(SOCKET_EVENTS.TYPING_STOP);
+      socketService.off(SOCKET_EVENTS.RECORDING_START);
+      socketService.off(SOCKET_EVENTS.RECORDING_STOP);
       socketService.off(SOCKET_EVENTS.ROOM_TERMINATION_WARNING);
       socketService.off(SOCKET_EVENTS.ROOM_TERMINATED);
       socketService.off(SOCKET_EVENTS.ROOM_DELETED);
@@ -383,7 +401,7 @@ export default function Room() {
       socketService.off(SOCKET_EVENTS.WEBRTC_ANSWER);
       socketService.off(SOCKET_EVENTS.WEBRTC_ICE_CANDIDATE);
     };
-  }, [addMessage, deleteMessage, addUser, removeUser, updateParticipants, addTypingUser, removeTypingUser, clearRoom, navigate, roomUserId, leaveVoiceCall, joinVoiceCall]);
+  }, [addMessage, deleteMessage, addUser, removeUser, updateParticipants, addTypingUser, removeTypingUser, addRecordingUser, removeRecordingUser, clearRoom, navigate, roomUserId, leaveVoiceCall, joinVoiceCall]);
 
   useEffect(() => {
     webRTCService.setOnRemoteVoiceStreamsChange(setRemoteVoiceStreams);
@@ -617,6 +635,21 @@ export default function Room() {
     });
   };
 
+  const activeTyping = (typingUsers || []).filter(name => name !== displayName);
+  const activeRecording = (recordingUsers || []).filter(name => name !== displayName);
+  const hasActivity = activeTyping.length > 0 || activeRecording.length > 0;
+
+  const formatActivityList = (users) => {
+    if (users.length === 0) return '';
+    if (users.length <= 2) {
+      return users.join(', ');
+    }
+    return `${users.slice(0, 2).join(', ')} +${users.length - 2}`;
+  };
+
+  const typingText = formatActivityList(activeTyping);
+  const recordingText = formatActivityList(activeRecording);
+
   if (rejoining) {
     return (
       <div className="room-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '20px' }}>
@@ -657,15 +690,49 @@ export default function Room() {
           isRoomDeleted={roomDeleted}
           messagesEndRef={messagesEndRef}
           roomId={roomId || ''}
+          onReply={setReplyingTo}
         />
+
+        {hasActivity && (
+          <div className="vanta-activity-bar">
+            {activeTyping.length > 0 && (
+              <div className="activity-item typing">
+                <div className="typing-dots-animation">
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                </div>
+                <span className="activity-names">{typingText}</span>
+              </div>
+            )}
+            
+            {activeTyping.length > 0 && activeRecording.length > 0 && (
+              <span className="activity-divider">•</span>
+            )}
+
+            {activeRecording.length > 0 && (
+              <div className="activity-item recording">
+                <svg className="mic-pulse-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" y1="19" x2="12" y2="22" />
+                  <line x1="8" y1="22" x2="16" y2="22" />
+                </svg>
+                <span className="activity-names">{recordingText}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <MessageInput
           onSendMessage={(content) => {
             socketService.sendMessage({
               roomId: currentRoom,
               senderDisplayName: displayName,
-              content
+              content,
+              replyTo: replyingTo?.messageId || null
             });
+            setReplyingTo(null);
           }}
           onSendVoiceMessage={(mediaUrl, duration) => {
             socketService.emit('message-send', {
@@ -674,13 +741,19 @@ export default function Room() {
               content: '[Voice Message]',
               type: 'voice',
               mediaUrl,
-              duration
+              duration,
+              replyTo: replyingTo?.messageId || null
             });
+            setReplyingTo(null);
           }}
           onTypingStart={() => socketService.typingStart({ roomId: currentRoom, displayName })}
           onTypingStop={() => socketService.typingStop({ roomId: currentRoom, displayName })}
+          onRecordingStart={() => socketService.recordingStart({ roomId: currentRoom, displayName })}
+          onRecordingStop={() => socketService.recordingStop({ roomId: currentRoom, displayName })}
           disabled={roomDeleted}
           roomId={currentRoom || ''}
+          replyingTo={replyingTo}
+          onCancelReply={() => setReplyingTo(null)}
         />
 
         {activeModal === 'participants' && (

@@ -272,6 +272,14 @@ class SocketService {
   typingStop(data) {
     this.emit('typing-stop', data);
   }
+
+  recordingStart(data) {
+    this.emit('recording-start', data);
+  }
+
+  recordingStop(data) {
+    this.emit('recording-stop', data);
+  }
 }
 
 export default new SocketService();

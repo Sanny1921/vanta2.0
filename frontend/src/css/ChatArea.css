@@ -268,3 +268,123 @@
     font-size: 13px;
   }
 }
+
+/* ─── Message Reply Action Button ─────────────────────────────────────── */
+.btn-message-reply {
+  background: none;
+  border: none;
+  color: var(--vanta-text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.btn-message-reply svg {
+  display: block;
+}
+
+.message-row:hover .btn-message-reply {
+  opacity: 0.75;
+}
+
+.message-row:hover .btn-message-reply:hover {
+  opacity: 1;
+  color: var(--vanta-accent);
+  background-color: rgba(var(--vanta-accent-rgb), 0.08);
+}
+
+/* On mobile/touch screens, always show the reply button at a discoverable opacity */
+@media (max-width: 768px) {
+  .btn-message-reply {
+    opacity: 0.55;
+  }
+}
+
+/* ─── Quoted Preview Bubble inside Chat feed ──────────────────────────── */
+.message-reply-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(var(--vanta-accent-rgb), 0.04);
+  border-left: 2px solid var(--vanta-accent);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  max-width: fit-content;
+  user-select: none;
+  min-width: 0;
+}
+
+.message-reply-preview.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message-reply-preview.clickable:hover {
+  opacity: 1;
+  background-color: rgba(var(--vanta-accent-rgb), 0.08);
+}
+
+.message-reply-preview.expired {
+  border-left-color: var(--vanta-text-muted);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: var(--vanta-text-muted);
+}
+
+.reply-preview-icon {
+  transform: scaleX(-1);
+  flex-shrink: 0;
+}
+
+.reply-preview-sender {
+  font-weight: 700;
+  color: var(--vanta-accent);
+  flex-shrink: 0;
+}
+
+.reply-preview-sender::after {
+  content: ':';
+}
+
+.reply-preview-text {
+  color: var(--vanta-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+@media (max-width: 480px) {
+  .reply-preview-text {
+    max-width: 160px;
+  }
+}
+
+/* ─── Scroll Target Highlight Flash Animation ─────────────────────────── */
+@keyframes flashHighlight {
+  0% {
+    background-color: rgba(var(--vanta-accent-rgb), 0.25);
+    box-shadow: 0 0 12px 2px rgba(var(--vanta-accent-rgb), 0.15);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.highlight-flash {
+  animation: flashHighlight 1s ease-out;
+  border-radius: 8px;
+  transition: background-color 1s ease-out;
+}

@@ -51,6 +51,8 @@ export const SOCKET_EVENTS = {
   // Typing indicators
   TYPING_START: 'typing-start',
   TYPING_STOP: 'typing-stop',
+  RECORDING_START: 'recording-start',
+  RECORDING_STOP: 'recording-stop',
 
   // Room termination
   TERMINATE_ROOM: 'terminate-room',

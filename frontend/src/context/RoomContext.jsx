@@ -30,6 +30,7 @@ export const RoomProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [typingUsers, setTypingUsers] = useState(new Set());
+  const [recordingUsers, setRecordingUsers] = useState(new Set());
 
   // Connect socket on mount
   useEffect(() => {
@@ -325,6 +326,36 @@ export const RoomProvider = ({ children }) => {
     });
   }, []);
 
+  const sendRecordingStart = useCallback(() => {
+    if (currentRoom && displayName) {
+      socketService.recordingStart({
+        roomId: currentRoom,
+        displayName
+      });
+    }
+  }, [currentRoom, displayName]);
+
+  const sendRecordingStop = useCallback(() => {
+    if (currentRoom && displayName) {
+      socketService.recordingStop({
+        roomId: currentRoom,
+        displayName
+      });
+    }
+  }, [currentRoom, displayName]);
+
+  const addRecordingUser = useCallback((displayName) => {
+    setRecordingUsers(prev => new Set([...prev, displayName]));
+  }, []);
+
+  const removeRecordingUser = useCallback((displayName) => {
+    setRecordingUsers(prev => {
+      const next = new Set(prev);
+      next.delete(displayName);
+      return next;
+    });
+  }, []);
+
   const clearRoom = useCallback(() => {
     setCurrentRoom(null);
     setRoomUserId(null);
@@ -335,6 +366,8 @@ export const RoomProvider = ({ children }) => {
     setTotalUsers(0);
     setRoomSettings(null);
     setError(null);
+    setTypingUsers(new Set());
+    setRecordingUsers(new Set());
 
     // Clear sessionStorage
     sessionStorage.removeItem('vanta_room_id');
@@ -358,6 +391,7 @@ export const RoomProvider = ({ children }) => {
     loading,
     error,
     typingUsers: Array.from(typingUsers),
+    recordingUsers: Array.from(recordingUsers),
 
     // Actions
     createRoom,
@@ -376,6 +410,10 @@ export const RoomProvider = ({ children }) => {
     sendTypingStop,
     addTypingUser,
     removeTypingUser,
+    sendRecordingStart,
+    sendRecordingStop,
+    addRecordingUser,
+    removeRecordingUser,
     clearRoom,
 
     // Utilities
