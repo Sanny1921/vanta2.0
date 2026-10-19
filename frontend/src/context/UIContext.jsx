@@ -8,7 +8,7 @@ export const UIProvider = ({ children }) => {
   const [confirmModal, setConfirmModal] = useState(null); // { title, message, confirmLabel, cancelLabel, resolve }
   const [alertModal, setAlertModal] = useState(null); // { title, message, type, resolve }
 
-  const [theme, setTheme] = useState(() => localStorage.getItem('vanta_theme') || 'dark');
+  const [theme, setTheme] = useState(() => localStorage.getItem('vanta_theme') || 'light');
   const [accent, setAccent] = useState(() => localStorage.getItem('vanta_accent') || 'emerald');
 
   useEffect(() => {
