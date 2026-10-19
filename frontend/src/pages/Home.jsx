@@ -6,6 +6,8 @@ import socketService from '../services/socketService';
 import { getAppUrl } from '../config/constants';
 import ThemeSwitcher from '../components/ThemeSwitcher';
 import '../css/Home.css';
+import '../css/redesign.css';
+import '../css/redesign-room.css';
 
 const DIAG_PREFIX = '[Diag][Home]';
 
@@ -260,6 +262,17 @@ export default function Home() {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [activeFaqIndex, setActiveFaqIndex] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Scroll reveal for landing sections (visual only). Elements stay visible if this does not run.
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+    const els = document.querySelectorAll('.landing-page .section-label, .landing-page .section-title-new, .landing-page .how-step-card, .landing-page .feature-card, .landing-page .usecase-card, .landing-page .trust-item, .landing-page .comparison-table-wrapper, .landing-page .faq-list, .landing-page .final-cta-card');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.dataset.rv = 'in'; io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    els.forEach((el, i) => { el.dataset.rv = 'pre'; el.style.setProperty('--rv-d', `${(i % 4) * 70}ms`); io.observe(el); });
+    return () => io.disconnect();
+  }, []);
   const mobileMenuRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -677,7 +690,8 @@ export default function Home() {
       <header id="home" className="hero-section">
         <div className="hero-container-inner">
           <div className="hero-left">
-            <h1 className="hero-title">Create.<br />Share.<br />Talk.<br />Disappear.</h1>
+            <span className="hero-badge">No account. No history. Just the conversation.</span>
+            <h1 className="hero-title">Create.<br />Share.<br />Talk.<br /><span className="grad">Disappear.</span></h1>
             <p className="hero-description">
               Built for conversations, not archives.
             </p>
@@ -699,6 +713,14 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* TRUST STRIP */}
+      <section className="trust-strip" aria-label="Why people use Vanta">
+        <div className="trust-item"><span className="trust-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><div><strong>No sign-up</strong><span>Open a link and talk</span></div></div>
+        <div className="trust-item"><span className="trust-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><div><strong>Nothing stored</strong><span>Kept in memory, not a database</span></div></div>
+        <div className="trust-item"><span className="trust-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></span><div><strong>Rooms expire</strong><span>Gone when the timer ends</span></div></div>
+        <div className="trust-item"><span className="trust-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></span><div><strong>Any device</strong><span>Phone or laptop, no app</span></div></div>
+      </section>
 
       {/* SECTION 3 — HOW IT WORKS */}
       <section id="how-it-works" className="section how-it-works-section">
@@ -730,6 +752,20 @@ export default function Home() {
       </section>
 
       {/* SECTION 4 — WHY VANTA */}
+      {/* FEATURES */}
+      <section id="features" className="section features-section">
+        <span className="section-label">WHAT YOU GET</span>
+        <h2 className="section-title-new">Everything a quick conversation needs.</h2>
+        <div className="features-grid">
+          <div className="feature-card"><span className="feature-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><h3>No accounts</h3><p>Pick a display name and you are in. No email, no password, no profile.</p></div>
+          <div className="feature-card"><span className="feature-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><h3>Invite link or Room ID</h3><p>Share one link, or just the Room ID. People join from any browser.</p></div>
+          <div className="feature-card"><span className="feature-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/></svg></span><h3>Optional password</h3><p>Lock a room with a password. Only people who know it get in.</p></div>
+          <div className="feature-card"><span className="feature-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg></span><h3>Messages that expire</h3><p>Messages disappear after the room's retention timer. They are never saved to a database.</p></div>
+          <div className="feature-card"><span className="feature-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg></span><h3>Voice notes and calls</h3><p>Send a voice note or start a voice call right inside the room.</p></div>
+          <div className="feature-card"><span className="feature-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg></span><h3>Light or dark</h3><p>Switch theme and accent colour to suit you. Built to feel right on a phone.</p></div>
+        </div>
+      </section>
+
       <section id="why-vanta" className="section why-vanta-section">
         <span className="section-label">PHILOSOPHY</span>
         <h2 className="section-title-new">Temporary communication without permanent history.</h2>
@@ -859,6 +895,17 @@ export default function Home() {
       </section>
 
       {/* FAQ SECTION */}
+      <section id="use-cases" className="section usecases-section">
+        <span className="section-label">MADE FOR MOMENTS LIKE</span>
+        <h2 className="section-title-new">Talk now. Leave no trail.</h2>
+        <div className="usecases-grid">
+          <div className="usecase-card"><h3>Study group</h3><p>Clear a doubt with your batch, then let the room close.</p></div>
+          <div className="usecase-card"><h3>Quick team huddle</h3><p>Sort something out in five minutes without setting up a workspace.</p></div>
+          <div className="usecase-card"><h3>Class or event</h3><p>Put everyone in one place with a single link.</p></div>
+          <div className="usecase-card"><h3>Friends</h3><p>Plan the weekend, share a voice note, and move on.</p></div>
+        </div>
+      </section>
+
       <section id="faq" className="section faq-section">
         <span className="section-label">QUESTIONS & ANSWERS</span>
         <h2 className="section-title-new">Frequently Asked Questions</h2>
@@ -938,6 +985,7 @@ export default function Home() {
 
         <div className="footer-bottom-new">
           <p>© Vanta</p>
+          <a className="made-by-kreation" href="https://kreation-three.vercel.app" target="_blank" rel="noopener noreferrer" aria-label="Made by KREATION"><span>Made by</span><img src="/kreation-wordmark.webp" alt="KREATION" width="138" height="46" loading="lazy" /><span className="mk-heart" aria-hidden="true">&#9829;</span></a>
         </div>
       </footer>
 

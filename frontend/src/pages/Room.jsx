@@ -13,6 +13,7 @@ import RoomHeader from '../components/RoomHeader';
 import RoomDetailsModal from '../components/RoomDetailsModal';
 import ManageUsersModal from '../components/ManageUsersModal';
 import '../css/Room.css';
+import '../css/redesign-room.css';
 
 const MAX_VOICE_PARTICIPANTS = 8;
 

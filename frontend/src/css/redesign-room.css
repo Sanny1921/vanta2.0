@@ -1,0 +1,63 @@
+/* VANTA room + room-created screens: visual layer only (no behaviour changes). */
+.room-container{
+  --rd-grad:linear-gradient(135deg,var(--vanta-accent),#14b8c6 60%,#6366f1);
+  background:
+    radial-gradient(60% 50% at 90% 0%,rgba(var(--vanta-accent-rgb),.16),transparent 70%),
+    radial-gradient(50% 45% at 0% 100%,rgba(99,102,241,.12),transparent 70%),
+    var(--vanta-bg);
+}
+@media (min-width:900px){
+  .room-container{padding:18px;box-sizing:border-box}
+  .room-container .room-content-wrapper{border-radius:26px;border:1px solid var(--vanta-border);box-shadow:0 40px 90px -40px rgba(0,0,0,.55),0 0 0 6px rgba(255,255,255,.35);overflow:hidden}
+  [data-theme="dark"] .room-container .room-content-wrapper{box-shadow:0 40px 90px -40px rgba(0,0,0,.9),0 0 0 6px rgba(255,255,255,.03)}
+}
+.room-container .room-header{background:var(--vanta-navbar-bg,var(--vanta-surface));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--vanta-border),0 10px 30px -22px rgba(0,0,0,.4)}
+.room-container .room-title{font-weight:700;letter-spacing:.08em;display:inline-flex;align-items:center;gap:10px}
+.room-container .room-title::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--vanta-accent);box-shadow:0 0 0 0 rgba(var(--vanta-accent-rgb),.6);animation:rdPulse 2.4s infinite}
+@keyframes rdPulse{70%{box-shadow:0 0 0 9px rgba(var(--vanta-accent-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--vanta-accent-rgb),0)}}
+
+/* messages as bubbles */
+.room-container .messages-container{background:linear-gradient(180deg,transparent,rgba(var(--vanta-accent-rgb),.04));scroll-behavior:smooth}
+.room-container .message-row{gap:10px;margin-bottom:10px;animation:rdMsg .3s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rdMsg{from{opacity:0;transform:translate3d(0,8px,0)}to{opacity:1;transform:none}}
+.room-container .message-avatar{width:34px;height:34px;min-width:34px;font-size:13px;background:linear-gradient(135deg,rgba(var(--vanta-accent-rgb),.22),rgba(99,102,241,.18));border-color:rgba(var(--vanta-accent-rgb),.3)}
+.room-container .message-body{flex:0 1 auto;max-width:min(78%,560px);align-items:flex-start;gap:3px}
+.room-container .message-text-content{padding:9px 14px;border-radius:4px 18px 18px 18px;background:var(--vanta-card);border:1px solid var(--vanta-border);box-shadow:0 6px 16px -12px rgba(0,0,0,.35);font-size:14.5px;line-height:1.5}
+.room-container .message-row.own{flex-direction:row-reverse}
+.room-container .message-row.own .message-body{align-items:flex-end}
+.room-container .message-row.own .message-header-info{flex-direction:row-reverse}
+.room-container .message-row.own .message-text-content{border-radius:18px 4px 18px 18px;background:var(--rd-grad);color:#fff;border-color:transparent;box-shadow:0 10px 22px -12px rgba(var(--vanta-accent-rgb),.7)}
+.room-container .message-row.own .message-avatar{background:var(--rd-grad);color:#fff;border-color:transparent}
+.room-container .message-row.own .message-sender-name{color:var(--vanta-text-secondary)}
+@media (max-width:560px){.room-container .message-body{max-width:80%}.room-container .message-avatar{width:30px;height:30px;min-width:30px}}
+
+/* system notices */
+.room-container .system-message-content{background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border:1px solid var(--vanta-border);border-radius:999px}
+[data-theme="dark"] .room-container .system-message-content{background:rgba(255,255,255,.05)}
+
+/* composer */
+.room-container .message-input-form{gap:10px}
+.room-container .message-input{border-radius:999px;height:46px;padding:0 20px;transition:box-shadow .2s,border-color .2s,background .2s}
+.room-container .message-input:focus{box-shadow:0 0 0 4px rgba(var(--vanta-accent-rgb),.16);border-color:var(--vanta-accent);outline:none}
+.room-container .btn-attachment,.room-container .btn-mic{border-radius:50%;height:46px;width:46px;min-width:46px}
+.room-container .btn-send{border-radius:50%;height:46px;width:46px;min-width:46px;background:var(--rd-grad);box-shadow:0 10px 20px -10px rgba(var(--vanta-accent-rgb),.8)}
+.room-container .btn-send:hover:not(:disabled){background:var(--rd-grad);filter:brightness(1.06)}
+
+/* empty state card */
+.room-container .empty-state-card{border-radius:22px;border:1px solid var(--vanta-border);box-shadow:0 24px 50px -28px rgba(var(--vanta-accent-rgb),.55)}
+.room-container .empty-card-icon{background:linear-gradient(135deg,rgba(var(--vanta-accent-rgb),.2),rgba(99,102,241,.16))}
+.room-container .btn-copy-invite{border-radius:999px;background:var(--rd-grad);border:0;color:#fff}
+
+/* room created screen */
+.home-container{position:relative;background:
+  radial-gradient(55% 45% at 85% 0%,rgba(var(--vanta-accent-rgb),.18),transparent 70%),
+  radial-gradient(45% 40% at 0% 100%,rgba(99,102,241,.12),transparent 70%),var(--vanta-bg)}
+.home-container .home-header h1{font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,var(--vanta-accent),#14b8c6 60%,#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.home-container .room-created-success-card{border-radius:26px;border:1px solid var(--vanta-border);box-shadow:0 36px 80px -40px rgba(0,0,0,.5),0 0 0 6px rgba(255,255,255,.35);animation:rdMsg .5s cubic-bezier(.2,.7,.2,1) both}
+[data-theme="dark"] .home-container .room-created-success-card{box-shadow:0 36px 80px -40px rgba(0,0,0,.9),0 0 0 6px rgba(255,255,255,.03)}
+.home-container .waiting-participants-badge{border-radius:999px}
+.home-container .btn-primary{border-radius:999px;background:linear-gradient(135deg,var(--vanta-accent),#14b8c6 60%,#6366f1);border:0;color:#fff;font-weight:700;box-shadow:0 12px 24px -12px rgba(var(--vanta-accent-rgb),.8);transition:transform .2s,box-shadow .2s}
+.home-container .btn-primary:hover{transform:translateY(-1px)}
+.home-container .btn-secondary{border-radius:999px}
+.home-container .btn-copy-small{border-radius:999px}
+@media (prefers-reduced-motion:reduce){.room-container .message-row,.room-container .room-title::before,.home-container .room-created-success-card{animation:none}}
