@@ -8,7 +8,7 @@ import './App.css';
 import './css/UI.css';
 
 function App() {
-  const basename = window.location.pathname.startsWith('/vanta') ? '/vanta' : '';
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   return (
     <BrowserRouter basename={basename}>
